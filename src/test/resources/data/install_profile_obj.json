@@ -1,0 +1,42 @@
+{
+    "_comment_" : [
+        "Please do not automate the download and installation of Forge.",
+        "Our efforts are supported by ads from the download page.",
+        "If you MUST automate this, please consider supporting the project through https://www.patreon.com/LexManos/"
+    ],
+    "spec" : 0,
+    "profile" : "forge",
+    "version" : "1.12.2-forge-14.23.5.2847",
+    "icon" : "{ICON}",
+    "json" : "/version.json",
+    "path" : "net.minecraftforge:forge:1.12.2-14.23.5.2847",
+    "logo" : "/big_logo.png",
+    "minecraft" : "1.12.2",
+    "welcome" : "Welcome to the simple Forge installer.",
+    "data" : { },
+    "processors" : [ ],
+    "libraries" : [
+        {
+            "name" : "de.oceanlabs.mcp:mcp_config:1.12.2-20200226.224830@zip",
+            "downloads" : {
+                "artifact" : {
+                    "path" : "de/oceanlabs/mcp/mcp_config/1.12.2-20200226.224830/mcp_config-1.12.2-20200226.224830.zip",
+                    "url" : "https://files.minecraftforge.net/maven/de/oceanlabs/mcp/mcp_config/1.12.2-20200226.224830/mcp_config-1.12.2-20200226.224830.zip",
+                    "sha1" : "72e1b936f56e0dd394c64caf9c86af01f64dc979",
+                    "size" : 421086
+                }
+            }
+        },
+        {
+            "name" : "net.minecraftforge:forge:1.12.2-14.23.5.2855",
+            "downloads" : {
+                "artifact" : {
+                    "path" : "net/minecraftforge/forge/1.12.2-14.23.5.2855/forge-1.12.2-14.23.5.2855.jar",
+                    "url" : "",
+                    "sha1" : "52cecb6a3fbd765599b976dca445b21f33ab5634",
+                    "size" : 4464387
+                }
+            }
+        }
+    ]
+}

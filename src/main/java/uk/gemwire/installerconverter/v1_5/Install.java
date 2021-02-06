@@ -163,10 +163,10 @@ public final class Install implements IConvertable<ObjectNode> {
         node.put("profile", profileName);
         node.put("version", Conversions.convertId(target));
         node.put("icon", "{ICON}");
-        node.put("minecraft", minecraft);
         node.put("json", "/version.json");
-        node.put("logo", logo);
         node.put("path", path);
+        node.put("logo", logo);
+        node.put("minecraft", minecraft);
 
         if (urlIcon != null)
             node.put("urlIcon", urlIcon);

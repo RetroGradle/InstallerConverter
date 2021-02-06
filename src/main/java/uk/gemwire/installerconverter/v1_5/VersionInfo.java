@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -61,8 +60,18 @@ public final class VersionInfo implements IConvertable<ObjectNode> {
         // Convert `id`
         node.put("id", Conversions.convertId(id));
 
+        set(node, "time");
+        set(node, "releaseTime");
+        set(node, "type");
+        set(node, "mainClass");
+        set(node, "inheritsFrom");
+        set(node, "logging");
+        set(node, "minecraftArguments");
+
+        //TODO: Remove `jar` if == `inheritsFrom` ?
+
         // Add Additional Data
-        data.forEach(node::set);
+        data.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(e -> node.set(e.getKey(), e.getValue()));
 
         // Convert Libraries
         List<ObjectNode> libs = libraries.stream().map(l -> l.convert(factory)).collect(Collectors.toList());
@@ -70,6 +79,10 @@ public final class VersionInfo implements IConvertable<ObjectNode> {
 
         // Return VersionInfo
         return node;
+    }
+
+    private void set(ObjectNode node, String name) {
+        if (data.containsKey(name)) node.set(name, data.remove(name));
     }
 
 }
