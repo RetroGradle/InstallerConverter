@@ -2,7 +2,11 @@ package uk.gemwire.installerconverter.v1_5;
 
 import java.util.List;
 
-public final class LibraryInfo {
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import uk.gemwire.installerconverter.util.IConvertable;
+
+public final class LibraryInfo implements IConvertable<ObjectNode> {
     private String name;
     private List<String> checksums;
     private boolean clientreq = false;
@@ -47,5 +51,16 @@ public final class LibraryInfo {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    @Override
+    public void validate() throws IllegalStateException {
+        //TODO:
+    }
+
+    @Override
+    public ObjectNode convert(JsonNodeFactory factory) {
+        //TODO:
+        return factory.objectNode();
     }
 }

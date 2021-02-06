@@ -51,12 +51,4 @@ public class ParserTests {
         assertDoesNotThrow(() -> parse("1.12.2"));
     }
 
-    @Test
-    void parseVersionInfo() throws JsonProcessingException {
-        VersionInfo info = VersionInfoReader.readValue("{\"inheritsFrom\":\"1.7.10\",\"jar\":\"1.7.10\"}");
-
-        assertEquals("1.7.10", info.getInheritsFrom());
-        assertEquals("1.7.10", info.getJar());
-    }
-
 }

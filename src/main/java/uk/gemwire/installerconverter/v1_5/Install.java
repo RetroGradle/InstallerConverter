@@ -1,8 +1,13 @@
 package uk.gemwire.installerconverter.v1_5;
 
+import java.util.Objects;
 import javax.annotation.Nullable;
 
-public final class Install {
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import uk.gemwire.installerconverter.util.IConvertable;
+
+public final class Install implements IConvertable<ObjectNode> {
 
     private String profileName;
     private String target;
@@ -139,5 +144,50 @@ public final class Install {
 
     public void setHideExtract(boolean hideExtract) {
         this.hideExtract = hideExtract;
+    }
+
+    @Override
+    public void validate() throws AssertionError {
+        // TODO: Validate
+    }
+
+    @Override
+    public ObjectNode convert(JsonNodeFactory factory) {
+        ObjectNode node = factory.objectNode();
+
+        /* Skip MirrorList if it's forges - TODO: Check this is correct */
+        if (Objects.equals(mirrorList, "http://files.minecraftforge.net/mirror-brand.list")) mirrorList = null;
+
+        node.set("_comment_", Conversions.createCommentNode(factory));
+        node.put("spec", 0);
+        node.put("profile", profileName);
+        node.put("version", Conversions.convertId(target));
+        node.put("icon", "{ICON}");
+        node.put("minecraft", minecraft);
+        node.put("json", "/version.json");
+        node.put("logo", logo);
+        node.put("path", path);
+
+        if (urlIcon != null)
+            node.put("urlIcon", urlIcon);
+
+        node.put("welcome", Conversions.convertWelcome(welcome));
+
+        if (mirrorList != null)
+            node.put("mirrorList", mirrorList);
+
+        if (hideClient)
+            node.put("hideClient", true);
+        if (hideServer)
+            node.put("hideServer", true);
+        if (hideExtract)
+            node.put("hideExtract", true);
+
+        node.set("data", factory.objectNode());
+        node.set("processors", factory.arrayNode());
+
+        //TODO: Libraries
+
+        return node;
     }
 }
