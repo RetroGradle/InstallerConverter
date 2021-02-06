@@ -1,0 +1,12 @@
+{
+  "profileName": "forge",
+  "target":"1.12.2-forge1.12.2-14.23.5.2847",
+  "path":"net.minecraftforge:forge:1.12.2-14.23.5.2847",
+  "version":"forge 1.12.2-14.23.5.2847",
+  "filePath":"forge-1.12.2-14.23.5.2847-universal.jar",
+  "welcome":"Welcome to the simple forge installer.",
+  "minecraft":"1.12.2",
+  "mirrorList" : "http://files.minecraftforge.net/mirror-brand.list",
+  "logo":"/big_logo.png",
+  "modList":"none"
+}

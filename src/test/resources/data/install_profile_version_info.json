@@ -1,0 +1,20 @@
+{
+  "id": "1.12.2-forge1.12.2-14.23.5.2855",
+  "time": "2020-12-19T01:51:02+00:00",
+  "releaseTime": "2020-12-19T01:51:02+00:00",
+  "type": "release",
+  "minecraftArguments": "--username ${auth_player_name} --version ${version_name} --gameDir ${game_directory} --assetsDir ${assets_root} --assetIndex ${assets_index_name} --uuid ${auth_uuid} --accessToken ${auth_access_token} --userType ${user_type} --tweakClass net.minecraftforge.fml.common.launcher.FMLTweaker --versionType Forge",
+  "mainClass": "net.minecraft.launchwrapper.Launch",
+  "inheritsFrom": "1.12.2",
+  "jar": "1.12.2",
+  "logging": {},
+  "libraries": [
+    {
+      "name": "org.scala-lang:scala-xml_2.11:1.0.2",
+      "url" : "http://files.minecraftforge.net/maven/",
+      "checksums" : [ "7a80ec00aec122fba7cd4e0d4cdd87ff7e4cb6d0", "62736b01689d56b6d09a0164b7ef9da2b0b9633d" ],
+      "serverreq":true,
+      "clientreq":true
+    }
+  ]
+}

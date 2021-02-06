@@ -9,7 +9,6 @@ version = '0.1'
 repositories {
     mavenCentral()
     jcenter()
-    maven { url = 'https://files.minecraftforge.net/maven/' }
 }
 
 dependencies {
@@ -17,6 +16,9 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.11.2'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.2'
     implementation group: 'com.google.jimfs', name: 'jimfs', version: '1.2'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
 
 application {
@@ -42,4 +44,8 @@ tasks.withType(Test) {
 
 tasks.withType(JavaExec) {
     jvmArgs += "--enable-preview"
+}
+
+test {
+    useJUnitPlatform()
 }
