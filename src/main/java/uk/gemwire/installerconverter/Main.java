@@ -2,21 +2,42 @@ package uk.gemwire.installerconverter;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import uk.gemwire.installerconverter.raw.Converter;
 import uk.gemwire.installerconverter.util.Jackson;
+import uk.gemwire.installerconverter.util.Maven;
 import uk.gemwire.installerconverter.util.Pair;
 import uk.gemwire.installerconverter.v1_5.InstallProfile;
+import uk.gemwire.installerconverter.v1_5.LibraryInfo;
 
 /**
  * @author RetroGradle
  */
 public class Main {
     public static void main(String... args) throws IOException {
-        printRaw();
+        //printRaw();
+        //
+        //printObj();
 
-        printObj();
+        System.out.println("Converting org.ow2.asm:asm-all:5.2");
+
+        LibraryInfo info = Jackson.JSON.readValue(
+            "{"
+            + "      \"name\": \"org.ow2.asm:asm-all:5.2\",\n"
+            + "      \"url\" : \"http://files.minecraftforge.net/maven/\",\n"
+            + "      \"checksums\" : [ \"2ea49e08b876bbd33e0a7ce75c8f371d29e1f10a\" ],\n"
+            + "      \"serverreq\":true,\n"
+            + "      \"clientreq\":true\n"
+            + "    }",
+            LibraryInfo.class
+        );
+
+        ObjectNode node = info.convert(Jackson.JSON.getNodeFactory());
+        String url = node.with("downloads").with("artifact").get("url").asText();
+        Pair<String, Long> pair = Maven.calculateSHA1andSize(new URL(url));
+        System.out.println(pair);
     }
 
     public static void printRaw() throws IOException {

@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import uk.gemwire.installerconverter.util.IConvertable;
+import uk.gemwire.installerconverter.util.JacksonUsed;
 
 public final class Install implements IConvertable<ObjectNode> {
 
@@ -25,123 +26,77 @@ public final class Install implements IConvertable<ObjectNode> {
     private boolean hideServer = false;
     private boolean hideExtract = false;
 
-    public String getProfileName() {
-        return profileName;
-    }
-
+    @JacksonUsed
     public void setProfileName(String profileName) {
         this.profileName = profileName;
     }
 
-    public String getTarget() {
-        return target;
-    }
-
+    @JacksonUsed
     public void setTarget(String target) {
         this.target = target;
     }
 
-    public String getPath() {
-        return path;
-    }
-
+    @JacksonUsed
     public void setPath(String path) {
         this.path = path;
     }
 
-    @Nullable
-    public String getModList() {
-        return modList;
-    }
-
+    @JacksonUsed
     public void setModList(@Nullable String modList) {
         this.modList = modList;
     }
 
-    public String getVersion() {
-        return version;
-    }
-
+    @JacksonUsed
     public void setVersion(String version) {
         this.version = version;
     }
 
-    public String getWelcome() {
-        return welcome;
-    }
-
+    @JacksonUsed
     public void setWelcome(String welcome) {
         this.welcome = welcome;
     }
 
-    public String getLogo() {
-        return logo;
-    }
-
+    @JacksonUsed
     public void setLogo(String logo) {
         this.logo = logo;
     }
 
-    public String getUrlIcon() {
-        return urlIcon;
-    }
-
+    @JacksonUsed
     public void setUrlIcon(String urlIcon) {
         this.urlIcon = urlIcon;
     }
 
-    public boolean isStripMeta() {
-        return stripMeta;
-    }
-
+    @JacksonUsed
     public void setStripMeta(boolean stripMeta) {
         this.stripMeta = stripMeta;
     }
 
-    public String getFilePath() {
-        return filePath;
-    }
-
+    @JacksonUsed
     public void setFilePath(String filePath) {
         this.filePath = filePath;
     }
 
-    public String getMinecraft() {
-        return minecraft;
-    }
-
+    @JacksonUsed
     public void setMinecraft(String minecraft) {
         this.minecraft = minecraft;
     }
 
-    public String getMirrorList() {
-        return mirrorList;
-    }
-
+    @JacksonUsed
     public void setMirrorList(String mirrorList) {
         this.mirrorList = mirrorList;
     }
 
-    public boolean isHideClient() {
-        return hideClient;
-    }
-
+    @JacksonUsed
     public void setHideClient(boolean hideClient) {
         this.hideClient = hideClient;
     }
 
-    public boolean isHideServer() {
-        return hideServer;
-    }
-
+    @JacksonUsed
     public void setHideServer(boolean hideServer) {
         this.hideServer = hideServer;
     }
 
-    public boolean isHideExtract() {
-        return hideExtract;
-    }
-
+    @JacksonUsed
     public void setHideExtract(boolean hideExtract) {
         this.hideExtract = hideExtract;
     }
@@ -186,7 +141,7 @@ public final class Install implements IConvertable<ObjectNode> {
         node.set("data", factory.objectNode());
         node.set("processors", factory.arrayNode());
 
-        //TODO: Libraries
+        //TODO: Libraries (Necessary ?)
 
         return node;
     }
