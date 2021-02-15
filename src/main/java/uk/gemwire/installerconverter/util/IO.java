@@ -2,6 +2,8 @@ package uk.gemwire.installerconverter.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 
 public abstract class IO {
 
@@ -21,4 +23,18 @@ public abstract class IO {
         return size;
     }
 
+    public static String toString(InputStream stream, Charset charset) throws IOException {
+        char[] buffer = new char[BUFFER_SIZE];
+
+        StringBuilder builder = new StringBuilder();
+        InputStreamReader reader = new InputStreamReader(stream, charset);
+
+        int read = 1;
+        while (read >= 1)  {
+            read = reader.read(buffer);
+            if (read >= 1) builder.append(buffer, 0, read);
+        }
+
+        return builder.toString();
+    }
 }

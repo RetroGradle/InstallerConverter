@@ -1,11 +1,20 @@
 package uk.gemwire.installerconverter;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import uk.gemwire.installerconverter.raw.Converter;
+import uk.gemwire.installerconverter.resolver.CachedResolver;
+import uk.gemwire.installerconverter.resolver.LocalResolver;
+import uk.gemwire.installerconverter.resolver.RemoteResolver;
 import uk.gemwire.installerconverter.util.Jackson;
 import uk.gemwire.installerconverter.util.Maven;
 import uk.gemwire.installerconverter.util.Pair;
@@ -16,9 +25,14 @@ import uk.gemwire.installerconverter.v1_5.LibraryInfo;
  * @author RetroGradle
  */
 public class Main {
+    public static final Path PATH_CACHED_RESOLVER = Path.of("sha1-size.cache");
+    public static CachedResolver CACHED_RESOLVER = null;
+
     public static void main(String... args) throws IOException {
+        setup();
+
         //printRaw();
-        //
+
         //printObj();
 
         System.out.println("Converting org.ow2.asm:asm-all:5.2");
@@ -34,10 +48,27 @@ public class Main {
             LibraryInfo.class
         );
 
-        ObjectNode node = info.convert(Jackson.JSON.getNodeFactory());
-        String url = node.with("downloads").with("artifact").get("url").asText();
-        Pair<String, Long> pair = Maven.calculateSHA1andSize(new URL(url));
-        System.out.println(pair);
+        info.convert(Jackson.JSON.getNodeFactory());
+
+        teardown();
+    }
+
+    public static void setup() throws IOException { //TODO: WIRING
+        CACHED_RESOLVER = new CachedResolver(new LocalResolver(Path.of("local"), new RemoteResolver()));
+
+        if (Files.exists(PATH_CACHED_RESOLVER)) {
+            try (Reader reader = Files.newBufferedReader(PATH_CACHED_RESOLVER)) {
+                CACHED_RESOLVER.deserialize(reader);
+            }
+        }
+
+        Config.RESOLVER = CACHED_RESOLVER;
+    }
+
+    public static void teardown() throws IOException {
+        try (Writer writer = Files.newBufferedWriter(PATH_CACHED_RESOLVER, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
+            CACHED_RESOLVER.serialize(writer);
+        }
     }
 
     public static void printRaw() throws IOException {

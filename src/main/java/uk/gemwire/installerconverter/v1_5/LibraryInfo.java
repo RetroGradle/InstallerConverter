@@ -1,15 +1,14 @@
 package uk.gemwire.installerconverter.v1_5;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.IConvertable;
 import uk.gemwire.installerconverter.util.JacksonUsed;
-import uk.gemwire.installerconverter.util.Maven;
 import uk.gemwire.installerconverter.util.Pair;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 
@@ -42,7 +41,7 @@ public final class LibraryInfo implements IConvertable<ObjectNode> {
 
     @JacksonUsed
     public void setUrl(String url) {
-        this.url = url;
+        this.url = url.replaceFirst("^http:", "https:") + (url.endsWith("/") ? "" : "/");
     }
 
     @Override
@@ -80,19 +79,21 @@ public final class LibraryInfo implements IConvertable<ObjectNode> {
         // Calculated Sha1/Size is for `-universal`
 
         String path = gav.asPath();
-        String finalURL = url.replaceFirst("^http:", "https:") + path;
+        String finalURL = url + path;
 
         ObjectNode artifact = factory.objectNode();
         artifact.put("path", path);
         artifact.put("url", finalURL);
 
-        System.out.println("Downloading: " + finalURL);
+        System.out.println("Resolving: " + finalURL);
 
         // TODO: Caching - We need to cache on `BASEURL:ARTIFACT` (over several runs).
         //  We should try local maven first
         //  Probably should check the sha1 of that against the `.sha1` on remote maven before using
         //  (This is mainly due to the fact that we know that Mojang host `alternatives` for certain libraries)
-        Pair<String, Long> data = Objects.equals(gav.artifact(), "forge") ? Pair.of("{SHA1}", 0L) :  Maven.calculateSHA1andSize(new URL(finalURL));
+        Pair<String, Long> data = Objects.equals(gav.artifact(), "forge") ? Pair.of("{SHA1}", 0L) : Config.RESOLVER.resolve(url, gav);
+
+        if (data == null) throw new IOException(String.format("Couldn't get Sha1 or Size for '%s' from '%s'", gav.asStringWithClassifier(), url));
 
         artifact.put("sha1", data.left()); // checksums != null ? checksums.get(0) : "{SHA1}");
         artifact.put("size", data.right());
