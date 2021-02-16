@@ -11,10 +11,10 @@ import javax.annotation.Nullable;
 import uk.gemwire.installerconverter.util.Log;
 import uk.gemwire.installerconverter.util.Pair;
 import uk.gemwire.installerconverter.util.maven.Artifact;
+import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 
 public class CachedResolver implements IResolver {
-
-    private final Map<Pair<String, Artifact>, Pair<String, Long>> cache = new HashMap<>();
+    private final Map<Pair<String, Artifact>, CachedArtifactInfo> cache = new HashMap<>();
     private final IResolver fallback;
 
     public CachedResolver(IResolver fallback) {
@@ -23,7 +23,7 @@ public class CachedResolver implements IResolver {
 
     @Override
     @Nullable
-    public Pair<String, Long> resolve(String host, Artifact artifact) {
+    public CachedArtifactInfo resolve(String host, Artifact artifact) {
         Log.trace(String.format("Resolving (Cached?): '%s' from '%s'", artifact.asStringWithClassifier(), host));
         return cache.computeIfAbsent(Pair.of(host, artifact), pair -> {
             Log.trace(String.format("Not Cached hitting actual: '%s' from '%s'", artifact.asStringWithClassifier(), host));
@@ -32,14 +32,14 @@ public class CachedResolver implements IResolver {
     }
 
     public void serialize(Writer writer) throws IOException {
-        for (Map.Entry<Pair<String, Artifact>, Pair<String, Long>> entry : cache.entrySet()) {
+        for (Map.Entry<Pair<String, Artifact>, CachedArtifactInfo> entry : cache.entrySet()) {
             Pair<String, Artifact> k = entry.getKey();
             String host = k.left();
             String artifact = k.right().asStringWithClassifier();
 
-            Pair<String, Long> v = entry.getValue();
-            String sha1 = v.left();
-            long expectedSize = v.right();
+            CachedArtifactInfo v = entry.getValue();
+            String sha1 = v.sha1Hash();
+            long expectedSize = v.expectedSize();
 
             writer
                 .append(host)
@@ -69,7 +69,7 @@ public class CachedResolver implements IResolver {
                         return;
                     }
 
-                    cache.put(Pair.of(parts[0], Artifact.of(parts[1])), Pair.of(parts[2], Long.valueOf(parts[3])));
+                    cache.put(Pair.of(parts[0], Artifact.of(parts[1])), new CachedArtifactInfo(parts[2], Long.parseLong(parts[3])));
                 });
         }
 

@@ -3,8 +3,8 @@ package uk.gemwire.installerconverter.resolver;
 import java.io.IOException;
 import javax.annotation.Nullable;
 
-import uk.gemwire.installerconverter.util.Pair;
 import uk.gemwire.installerconverter.util.maven.Artifact;
+import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 
 public abstract class AbstractResolver implements IResolver {
 
@@ -17,8 +17,8 @@ public abstract class AbstractResolver implements IResolver {
 
     @Override
     @Nullable
-    public Pair<String, Long> resolve(String host, Artifact artifact) {
-        Pair<String, Long> result = null;
+    public CachedArtifactInfo resolve(String host, Artifact artifact) {
+        CachedArtifactInfo result = null;
 
         try { //TODO: Log / Cleanup
             result = internalResolve(host, artifact);
@@ -33,6 +33,6 @@ public abstract class AbstractResolver implements IResolver {
     }
 
     @Nullable
-    abstract Pair<String, Long> internalResolve(String host, Artifact artifact) throws IOException;
+    protected abstract CachedArtifactInfo internalResolve(String host, Artifact artifact) throws IOException;
 
 }

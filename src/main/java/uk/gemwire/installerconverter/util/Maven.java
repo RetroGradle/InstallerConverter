@@ -7,6 +7,7 @@ import java.net.Proxy;
 import java.net.URL;
 
 import com.google.common.base.Charsets;
+import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 
 public abstract class Maven {
 
@@ -19,7 +20,7 @@ public abstract class Maven {
         return connection.getInputStream();
     }
 
-    public static Pair<String, Long> calculateSHA1andSize(URL url) throws IOException {
+    public static CachedArtifactInfo calculateSHA1andSize(URL url) throws IOException {
         try (InputStream stream = download(url)) {
             return Hashing.calculateSHA1andSize(stream);
         }
