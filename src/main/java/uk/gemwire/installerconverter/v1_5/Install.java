@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.IConvertable;
 import uk.gemwire.installerconverter.util.JacksonUsed;
 
@@ -117,7 +118,7 @@ public final class Install implements IConvertable<ObjectNode> {
         node.put("spec", 0);
         node.put("profile", profileName);
         node.put("version", Conversions.convertId(target));
-        node.put("icon", "{ICON}");
+        node.put("icon", Config.ICON); //TODO: Conversion?
         node.put("json", "/version.json");
         node.put("path", path);
         node.put("logo", logo);
@@ -141,7 +142,7 @@ public final class Install implements IConvertable<ObjectNode> {
         node.set("data", factory.objectNode());
         node.set("processors", factory.arrayNode());
 
-        //TODO: Libraries (Necessary ?)
+        //TODO: Libraries (Needs to provide the forge-universal (as forge))
 
         return node;
     }

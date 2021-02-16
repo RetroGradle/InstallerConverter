@@ -73,11 +73,6 @@ public final class LibraryInfo implements IConvertable<ObjectNode> {
     }
 
     public ObjectNode convertArtifact(JsonNodeFactory factory) throws IOException {
-        //TODO: We need to special case the :forge: dependency
-        //TODO: Forge Dependency
-        // URL = ""
-        // Calculated Sha1/Size is for `-universal`
-
         String path = gav.asPath();
         String finalURL = url + path;
 
@@ -87,15 +82,15 @@ public final class LibraryInfo implements IConvertable<ObjectNode> {
 
         System.out.println("Resolving: " + finalURL);
 
-        // TODO: Caching - We need to cache on `BASEURL:ARTIFACT` (over several runs).
-        //  We should try local maven first
-        //  Probably should check the sha1 of that against the `.sha1` on remote maven before using
-        //  (This is mainly due to the fact that we know that Mojang host `alternatives` for certain libraries)
+        //TODO: We need to special case the :forge: dependency
+        //TODO: Forge Dependency
+        // URL = ""
+        // Calculated Sha1/Size is for `-universal`
         Pair<String, Long> data = Objects.equals(gav.artifact(), "forge") ? Pair.of("{SHA1}", 0L) : Config.RESOLVER.resolve(url, gav);
 
         if (data == null) throw new IOException(String.format("Couldn't get Sha1 or Size for '%s' from '%s'", gav.asStringWithClassifier(), url));
 
-        artifact.put("sha1", data.left()); // checksums != null ? checksums.get(0) : "{SHA1}");
+        artifact.put("sha1", data.left());
         artifact.put("size", data.right());
 
         return artifact;

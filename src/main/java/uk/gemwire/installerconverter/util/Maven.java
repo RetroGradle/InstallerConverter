@@ -10,24 +10,23 @@ import com.google.common.base.Charsets;
 
 public abstract class Maven {
 
-    public static Pair<String, Long> calculateSHA1andSize(URL url) throws IOException {
+    public static InputStream download(URL url) throws IOException {
         HttpURLConnection connection = makeConnection(url);
 
         if (connection.getResponseCode() / 100 != 2)
             throw new IOException(String.format("Couldn't connect to server (responded with %s)", connection.getResponseCode()));
 
-        try (InputStream stream = connection.getInputStream()) {
+        return connection.getInputStream();
+    }
+
+    public static Pair<String, Long> calculateSHA1andSize(URL url) throws IOException {
+        try (InputStream stream = download(url)) {
             return Hashing.calculateSHA1andSize(stream);
         }
     }
 
     public static String downloadSha1(URL url) throws IOException {
-        HttpURLConnection connection = makeConnection(url);
-
-        if (connection.getResponseCode() / 100 != 2)
-            throw new IOException(String.format("Couldn't connect to server (responded with %s)", connection.getResponseCode()));
-
-        try (InputStream stream = connection.getInputStream()) {
+        try (InputStream stream = download(url)) {
             return IO.toString(stream, Charsets.UTF_8).trim();
         }
     }
