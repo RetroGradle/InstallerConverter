@@ -11,6 +11,7 @@ import uk.gemwire.installerconverter.util.IConvertable;
 import uk.gemwire.installerconverter.util.JacksonUsed;
 import uk.gemwire.installerconverter.util.Pair;
 import uk.gemwire.installerconverter.util.maven.Artifact;
+import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 
 public final class LibraryInfo implements IConvertable<ObjectNode> {
     private Artifact gav;
@@ -84,12 +85,12 @@ public final class LibraryInfo implements IConvertable<ObjectNode> {
         artifact.put("path", path);
         artifact.put("url", isForge ? "" : finalURL);
         //TODO: The forge gav should be grabbed from the inMemoryFs if possible
-        Pair<String, Long> data = Config.RESOLVER.resolve(isForge ? Config.BASE_MAVEN : url, isForge ? Artifact.of(gav.asString() + ":universal") : gav);
+        CachedArtifactInfo data = Config.RESOLVER.resolve(isForge ? Config.BASE_MAVEN : url, isForge ? Artifact.of(gav.asString() + ":universal") : gav);
 
         if (data == null) throw new IOException(String.format("Couldn't get Sha1 or Size for '%s' from '%s'", gav.asStringWithClassifier(), url));
 
-        artifact.put("sha1", data.left());
-        artifact.put("size", data.right());
+        artifact.put("sha1", data.sha1Hash());
+        artifact.put("size", data.expectedSize());
 
         return artifact;
     }
