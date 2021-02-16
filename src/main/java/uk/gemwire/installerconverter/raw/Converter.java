@@ -86,8 +86,8 @@ public class Converter {
     public static String convertId(String id) {
         String[] parts = id.split("-", 3);
 
-        if (parts.length != 3) throw new AssertionError("Invalid id length: " + id);
-        if(!parts[1].startsWith("forge")) throw new AssertionError("Invalid id: " + id);
+        if (parts.length != 3) throw new IllegalArgumentException("Invalid id length: " + id);
+        if(!parts[1].startsWith("forge")) throw new IllegalArgumentException("Invalid id: " + id);
 
         return parts[0] + "-forge-" + parts[2];
     }

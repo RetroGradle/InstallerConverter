@@ -105,7 +105,7 @@ public final class Install implements IConvertable<ObjectNode> {
     }
 
     @Override
-    public void validate() throws AssertionError {
+    public void validate() throws IllegalStateException {
         // TODO: Validate
     }
 
