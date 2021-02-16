@@ -1,15 +1,22 @@
 package uk.gemwire.installerconverter;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 import uk.gemwire.installerconverter.util.Installers;
+import uk.gemwire.installerconverter.util.Jackson;
+import uk.gemwire.installerconverter.util.Pair;
 import uk.gemwire.installerconverter.util.maven.Artifact;
+import uk.gemwire.installerconverter.v1_5.InstallProfile;
 
 import static java.nio.file.FileSystems.newFileSystem;
 
@@ -54,11 +61,11 @@ public class InstallerConverter {
                 return;
             }
 
-            // Convert `installer_profile.json` -> `installer_profile.json` & `version.json`
-            System.out.println(" - Converting installer profile");
+            // Convert `install_profile.json` -> `install_profile.json` & `version.json`
+            System.out.println(" - Converting install profile");
             convertProfile(
-                installer.getPath("installer_profile.json"),
-                output.getPath("installer_profile.json"),
+                installer.getPath("install_profile.json"),
+                output.getPath("install_profile.json"),
                 output.getPath("version.json")
             );
 
@@ -89,8 +96,24 @@ public class InstallerConverter {
         System.out.printf("Conversion of Installer for version %s is complete.%n", version);
     }
 
-    private static void convertProfile(Path original, Path converted, Path versionInfo) {
-        //TODO:
+    private static void convertProfile(Path original, Path converted, Path versionInfo) throws IOException {
+        try (InputStream stream = Files.newInputStream(original)) {
+            InstallProfile profile = Jackson.JSON.readValue(stream, InstallProfile.class);
+
+            profile.validate();
+
+            Pair<ObjectNode, ObjectNode> modified = profile.convert(Jackson.JSON.getNodeFactory());
+
+            System.out.println(" - Writing install-profile.json");
+            try (OutputStream out = Files.newOutputStream(converted)) {
+                Jackson.JSON.writeValue(out, modified.left());
+            }
+
+            System.out.println(" - Writing version.json");
+            try (OutputStream out = Files.newOutputStream(versionInfo)) {
+                Jackson.JSON.writeValue(out, modified.right());
+            }
+        }
     }
 
     private static void copy(FileSystem input, FileSystem output, String path) throws IOException {

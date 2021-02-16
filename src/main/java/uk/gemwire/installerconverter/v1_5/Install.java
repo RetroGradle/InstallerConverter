@@ -1,8 +1,10 @@
 package uk.gemwire.installerconverter.v1_5;
 
+import java.io.IOException;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import uk.gemwire.installerconverter.Config;
@@ -108,7 +110,7 @@ public final class Install implements IConvertable<ObjectNode> {
     }
 
     @Override
-    public ObjectNode convert(JsonNodeFactory factory) {
+    public ObjectNode convert(JsonNodeFactory factory) throws IOException {
         ObjectNode node = factory.objectNode();
 
         /* Skip MirrorList if it's forges - TODO: Check this is correct */
@@ -143,6 +145,9 @@ public final class Install implements IConvertable<ObjectNode> {
         node.set("processors", factory.arrayNode());
 
         //TODO: Libraries (Needs to provide the forge-universal (as forge))
+        LibraryInfo forge = new LibraryInfo();
+        forge.setName(path);
+        node.set("libraries", factory.arrayNode().add(forge.convert(factory)));
 
         return node;
     }

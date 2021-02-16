@@ -73,20 +73,18 @@ public final class LibraryInfo implements IConvertable<ObjectNode> {
     }
 
     public ObjectNode convertArtifact(JsonNodeFactory factory) throws IOException {
+        boolean isForge = Objects.equals(gav.artifact(), "forge");
+
         String path = gav.asPath();
         String finalURL = url + path;
 
-        ObjectNode artifact = factory.objectNode();
-        artifact.put("path", path);
-        artifact.put("url", finalURL);
-
         System.out.println("Resolving: " + finalURL);
 
-        //TODO: We need to special case the :forge: dependency
-        //TODO: Forge Dependency
-        // URL = ""
-        // Calculated Sha1/Size is for `-universal`
-        Pair<String, Long> data = Objects.equals(gav.artifact(), "forge") ? Pair.of("{SHA1}", 0L) : Config.RESOLVER.resolve(url, gav);
+        ObjectNode artifact = factory.objectNode();
+        artifact.put("path", path);
+        artifact.put("url", isForge ? "" : finalURL);
+        //TODO: The forge gav should be grabbed from the inMemoryFs if possible
+        Pair<String, Long> data = Config.RESOLVER.resolve(isForge ? Config.BASE_MAVEN : url, isForge ? Artifact.of(gav.asString() + ":universal") : gav);
 
         if (data == null) throw new IOException(String.format("Couldn't get Sha1 or Size for '%s' from '%s'", gav.asStringWithClassifier(), url));
 
