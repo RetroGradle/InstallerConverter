@@ -42,8 +42,8 @@ public final class VersionInfo implements IConvertable<ObjectNode> {
     }
 
     @Override
-    public void validate() throws AssertionError {
-        if (id == null) throw new AssertionError("No Id for VersionInfo");
+    public void validate() throws IllegalStateException {
+        if (id == null) throw new IllegalStateException("No Id for VersionInfo");
         for (LibraryInfo library : libraries)
             library.validate();
     }

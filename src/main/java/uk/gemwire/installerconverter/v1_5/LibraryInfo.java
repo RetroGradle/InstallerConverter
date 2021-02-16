@@ -46,7 +46,7 @@ public final class LibraryInfo implements IConvertable<ObjectNode> {
 
     @Override
     public void validate() throws IllegalStateException {
-        if (gav == null) throw new AssertionError("No Name for LibraryInfo");
+        if (gav == null) throw new IllegalStateException("No Name for LibraryInfo");
     }
 
     @Override
