@@ -3,8 +3,8 @@ package uk.gemwire.installerconverter.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.Proxy;
 import java.net.URL;
+import java.net.URLConnection;
 
 import com.google.common.base.Charsets;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
@@ -12,10 +12,10 @@ import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 public abstract class Maven {
 
     public static InputStream download(URL url) throws IOException {
-        HttpURLConnection connection = makeConnection(url);
+        URLConnection connection = makeConnection(url);
 
-        if (connection.getResponseCode() / 100 != 2)
-            throw new IOException(String.format("Couldn't connect to server (responded with %s)", connection.getResponseCode()));
+        if (connection instanceof HttpURLConnection httpConn && (httpConn.getResponseCode() < 200 || httpConn.getResponseCode() >= 300))
+            throw new IOException("Couldn't connect to server (responded with %s)".formatted(httpConn.getResponseCode()));
 
         return connection.getInputStream();
     }
@@ -32,8 +32,8 @@ public abstract class Maven {
         }
     }
 
-    public static HttpURLConnection makeConnection(URL url) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection)url.openConnection(Proxy.NO_PROXY); //TODO: Proxy?
+    public static URLConnection makeConnection(URL url) throws IOException {
+        URLConnection connection = url.openConnection();
         connection.setUseCaches(false);
         connection.setDefaultUseCaches(false);
         connection.setRequestProperty("Cache-Control", "no-store,max-age=0,no-cache");
