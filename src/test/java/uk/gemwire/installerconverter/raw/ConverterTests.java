@@ -20,8 +20,8 @@ public class ConverterTests {
         assertEquals("a-forge-b", Converter.convertId("a-forgeextra-b"));
         assertEquals("1.12.2-forge-14.23.5.2847", Converter.convertId("1.12.2-forge1.12.2-14.23.5.2847"));
 
-        assertThrows(AssertionError.class, () -> Converter.convertId(""));
-        assertThrows(AssertionError.class, () -> Converter.convertId("a-b-c"));
+        assertThrows(IllegalArgumentException.class, () -> Converter.convertId(""));
+        assertThrows(IllegalArgumentException.class, () -> Converter.convertId("a-b-c"));
     }
 
     @Test

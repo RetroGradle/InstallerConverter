@@ -12,9 +12,9 @@ public class ConversionsTest {
         assertEquals("a-forge-b", Conversions.convertId("a-forgeextra-b"));
         assertEquals("1.12.2-forge-14.23.5.2847", Conversions.convertId("1.12.2-forge1.12.2-14.23.5.2847"));
 
-        assertThrows(AssertionError.class, () -> Conversions.convertId(""));
-        assertThrows(AssertionError.class, () -> Conversions.convertId("a-b"));
-        assertThrows(AssertionError.class, () -> Conversions.convertId("a-b-c"));
+        assertThrows(IllegalArgumentException.class, () -> Conversions.convertId(""));
+        assertThrows(IllegalArgumentException.class, () -> Conversions.convertId("a-b"));
+        assertThrows(IllegalArgumentException.class, () -> Conversions.convertId("a-b-c"));
     }
 
 }
