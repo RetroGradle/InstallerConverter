@@ -7,7 +7,8 @@ public record Artifact(String group, String artifact, String version, @Nullable 
     public static Artifact of(String gav) {
         String[] parts = gav.split(":", 4);
 
-        if (parts.length < 3) throw new IllegalStateException("Invalid Maven Artifact: " + gav);
+        // Maven artifacts have 3-4 parts (group:artifact:version:classifier)
+        if (parts.length < 3 || parts.length > 4) throw new IllegalStateException("Invalid Maven Artifact: " + gav);
 
         return new Artifact(parts[0], parts[1], parts[2], parts.length > 3 ? parts[3] : null);
     }
