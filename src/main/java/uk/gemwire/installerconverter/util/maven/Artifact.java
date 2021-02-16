@@ -1,6 +1,7 @@
 package uk.gemwire.installerconverter.util.maven;
 
 import javax.annotation.Nullable;
+import java.util.StringJoiner;
 
 public record Artifact(String group, String artifact, String version, @Nullable String classifier) {
 
@@ -25,4 +26,8 @@ public record Artifact(String group, String artifact, String version, @Nullable 
         return group.replaceAll("\\.", "/") + "/" + artifact + "/" + version + "/" + jar;
     }
 
+    @Override
+    public String toString() {
+        return asStringWithClassifier();
+    }
 }

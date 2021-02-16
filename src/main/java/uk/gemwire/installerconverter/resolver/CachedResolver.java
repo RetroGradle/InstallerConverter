@@ -8,12 +8,16 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.util.Log;
 import uk.gemwire.installerconverter.util.Pair;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 
 public class CachedResolver implements IResolver {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CachedResolver.class);
+
     private final Map<Pair<String, Artifact>, CachedArtifactInfo> cache = new HashMap<>();
     private final IResolver fallback;
 
@@ -24,9 +28,9 @@ public class CachedResolver implements IResolver {
     @Override
     @Nullable
     public CachedArtifactInfo resolve(String host, Artifact artifact) {
-        Log.trace(String.format("Resolving (Cached?): '%s' from '%s'", artifact.asStringWithClassifier(), host));
+        LOGGER.trace("Retrieving artifact {} (of host {}) from cache", artifact.asStringWithClassifier(), host);
         return cache.computeIfAbsent(Pair.of(host, artifact), pair -> {
-            Log.trace(String.format("Not Cached hitting actual: '%s' from '%s'", artifact.asStringWithClassifier(), host));
+            LOGGER.trace("Artifact {} not found in cache, resolving from host {}", pair.right().asStringWithClassifier(), pair.left());
             return fallback.resolve(pair.left(), pair.right());
         });
     }

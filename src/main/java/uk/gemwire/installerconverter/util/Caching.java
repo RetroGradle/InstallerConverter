@@ -1,10 +1,14 @@
 package uk.gemwire.installerconverter.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 public interface Caching {
+    Logger LOGGER = LoggerFactory.getLogger(Caching.class); // TODO: convert to class and make this private
 
     Path CACHE = Path.of(".cache");
 
@@ -21,6 +25,7 @@ public interface Caching {
         if (Files.exists(cached)) return cached;
 
         System.out.printf("Caching: no cached copy of %s, running generator%n", cached);
+
         try {
             generator.accept(cached);
         } catch (IOException exception) {

@@ -1,4 +1,4 @@
-package uk.gemwire.installerconverter.util;
+package uk.gemwire.installerconverter.util.maven;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,7 +7,8 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import com.google.common.base.Charsets;
-import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
+import uk.gemwire.installerconverter.util.Hashing;
+import uk.gemwire.installerconverter.util.IO;
 
 public abstract class Maven {
 
