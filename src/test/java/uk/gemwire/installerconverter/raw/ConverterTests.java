@@ -6,14 +6,21 @@ import java.nio.file.Path;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import uk.gemwire.installerconverter.Main;
 import uk.gemwire.installerconverter.util.Jackson;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ConverterTests {
+
+    @BeforeAll
+    static void setup() throws IOException {
+        Main.setup();
+    }
 
     @Test
     void convertId() {

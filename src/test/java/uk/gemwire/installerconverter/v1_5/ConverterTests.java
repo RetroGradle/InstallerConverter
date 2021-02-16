@@ -1,17 +1,27 @@
 package uk.gemwire.installerconverter.v1_5;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.io.Resources;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import uk.gemwire.installerconverter.Main;
 import uk.gemwire.installerconverter.util.IConvertable;
 import uk.gemwire.installerconverter.util.Jackson;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ConverterTests {
+
+    @BeforeAll
+    static void setup() throws IOException {
+        Main.setup();
+    }
 
     @Test
     void convertInstall() throws IOException {
@@ -28,7 +38,13 @@ public class ConverterTests {
     }
 
     String getTestData(String name) throws IOException {
-        return Files.readString(Path.of("src/test/resources/data/" + name));
+        try {
+            //noinspection UnstableApiUsage
+            return Files.readString(Path.of(Resources.getResource("data/" + name).toURI()));
+        } catch (URISyntaxException e) {
+            fail("Failed to create URI for test data " + name);
+            return null;
+        }
     }
 
 }
