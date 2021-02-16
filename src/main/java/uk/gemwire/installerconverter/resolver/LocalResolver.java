@@ -9,13 +9,15 @@ import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.util.Hashing;
-import uk.gemwire.installerconverter.util.Log;
-import uk.gemwire.installerconverter.util.Maven;
+import uk.gemwire.installerconverter.util.maven.Maven;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 
 public class LocalResolver extends AbstractResolver {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalResolver.class);
 
     private final Path localRoot;
 
@@ -38,7 +40,7 @@ public class LocalResolver extends AbstractResolver {
         // If we don't have a local copy return
         if (!Files.exists(local)) return null;
 
-        Log.trace(String.format("Have potential Local for '%s' from '%s'", artifact.asStringWithClassifier(), host));
+        LOGGER.trace("Checking for local copy of artifact {} (of host {})", artifact, host);
 
         try (InputStream stream = Files.newInputStream(local, StandardOpenOption.READ)) {
             // Otherwise calculate from Local
@@ -53,14 +55,14 @@ public class LocalResolver extends AbstractResolver {
 
                 // Ensure the local sha1 is equal to the remote declared sha1
                 if (!Objects.equals(fromLocal.sha1Hash(), remoteHash)) {
-                    Log.trace(String.format("Local Sha1 didn't match Remote for '%s' from '%s'", artifact.asStringWithClassifier(), host));
+                    LOGGER.trace("Local SHA-1 hash for artifact {} did not match remote hash from host {}", artifact, host);
                     return null;
                 }
             } catch (IOException e) {
-                Log.warn(String.format("Couldn't resolve Remote sha1 for '%s' from '%s' assuming Local is valid", artifact.asStringWithClassifier(), host));
+                LOGGER.warn("Could not resolve remote hash for artifact {} from host {}; assuming local is valid", artifact, host, e);
             }
 
-            Log.trace(String.format("Using Local for '%s' from '%s'", artifact.asStringWithClassifier(), host));
+            LOGGER.warn("Using local copy of artifact {} from host {}", artifact, host);
             return fromLocal;
         }
     }
