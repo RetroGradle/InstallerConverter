@@ -2,7 +2,7 @@ package uk.gemwire.installerconverter.util;
 
 import java.util.logging.Logger;
 
-public abstract class Log {
+public final class Log {
 
     public static final Logger LOGGER = Logger.getLogger("InstallerConverter");
 
