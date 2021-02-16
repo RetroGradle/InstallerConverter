@@ -12,8 +12,8 @@ import javax.annotation.Nullable;
 import uk.gemwire.installerconverter.util.Hashing;
 import uk.gemwire.installerconverter.util.Log;
 import uk.gemwire.installerconverter.util.Maven;
-import uk.gemwire.installerconverter.util.Pair;
 import uk.gemwire.installerconverter.util.maven.Artifact;
+import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 
 public class LocalResolver extends AbstractResolver {
 
@@ -31,7 +31,7 @@ public class LocalResolver extends AbstractResolver {
 
     @Override
     @Nullable
-    Pair<String, Long> internalResolve(String host, Artifact artifact) throws IOException {
+    protected CachedArtifactInfo internalResolve(String host, Artifact artifact) throws IOException {
         String path = artifact.asPath();
         Path local = localRoot.resolve(path);
 
@@ -42,7 +42,7 @@ public class LocalResolver extends AbstractResolver {
 
         try (InputStream stream = Files.newInputStream(local, StandardOpenOption.READ)) {
             // Otherwise calculate from Local
-            Pair<String, Long> fromLocal = Hashing.calculateSHA1andSize(stream);
+            CachedArtifactInfo fromLocal = Hashing.calculateSHA1andSize(stream);
 
             try {
                 // Download the remote sha1
@@ -52,7 +52,7 @@ public class LocalResolver extends AbstractResolver {
                 if (remoteHash.length() == 0) throw new IOException();
 
                 // Ensure the local sha1 is equal to the remote declared sha1
-                if (!Objects.equals(fromLocal.left(), remoteHash)) {
+                if (!Objects.equals(fromLocal.sha1Hash(), remoteHash)) {
                     Log.trace(String.format("Local Sha1 didn't match Remote for '%s' from '%s'", artifact.asStringWithClassifier(), host));
                     return null;
                 }
