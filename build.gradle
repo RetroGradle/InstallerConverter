@@ -27,6 +27,12 @@ application {
     applicationDefaultJvmArgs += ["--enable-preview"]
 }
 
+
+run {
+    workingDir = file('run/')
+    workingDir.mkdirs()
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(15)
@@ -49,4 +55,5 @@ tasks.withType(JavaExec) {
 
 test {
     useJUnitPlatform()
+    workingDir = 'run/'
 }
