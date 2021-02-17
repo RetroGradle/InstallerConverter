@@ -1,7 +1,6 @@
 package uk.gemwire.installerconverter.util.maven;
 
 import javax.annotation.Nullable;
-import java.util.StringJoiner;
 
 public record Artifact(String group, String artifact, String version, @Nullable String classifier) {
 

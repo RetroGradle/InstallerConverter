@@ -6,14 +6,18 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.IConvertable;
 import uk.gemwire.installerconverter.util.JacksonUsed;
-import uk.gemwire.installerconverter.util.Pair;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 
 public final class LibraryInfo implements IConvertable<ObjectNode> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LibraryInfo.class);
+
     private Artifact gav;
     private List<String> checksums;
     private boolean clientreq = false;
@@ -79,7 +83,7 @@ public final class LibraryInfo implements IConvertable<ObjectNode> {
         String path = gav.asPath();
         String finalURL = url + path;
 
-        System.out.println("Resolving: " + finalURL);
+        LOGGER.debug("Resolving: " + finalURL);
 
         ObjectNode artifact = factory.objectNode();
         artifact.put("path", path);

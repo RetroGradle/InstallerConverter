@@ -3,6 +3,7 @@ package uk.gemwire.installerconverter.resolver;
 import java.io.IOException;
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 
@@ -10,9 +11,11 @@ public abstract class AbstractResolver implements IResolver {
 
     @Nullable
     private final IResolver fallback;
+    private final Logger logger;
 
-    protected AbstractResolver(@Nullable IResolver fallback) {
+    protected AbstractResolver(@Nullable IResolver fallback, Logger logger) {
         this.fallback = fallback;
+        this.logger = logger;
     }
 
     @Override
@@ -20,10 +23,10 @@ public abstract class AbstractResolver implements IResolver {
     public CachedArtifactInfo resolve(String host, Artifact artifact) {
         CachedArtifactInfo result = null;
 
-        try { //TODO: Log / Cleanup
+        try {
             result = internalResolve(host, artifact);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Resolve failed with exception", e);
         }
 
         if (result == null && fallback != null)

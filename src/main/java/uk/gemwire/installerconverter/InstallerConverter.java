@@ -99,20 +99,20 @@ public class InstallerConverter {
 
     private static void convertProfile(Path original, Path converted, Path versionInfo) throws IOException {
         try (InputStream stream = Files.newInputStream(original)) {
-            InstallProfile profile = Jackson.JSON.readValue(stream, InstallProfile.class);
+            InstallProfile profile = Jackson.read(stream, InstallProfile.class);
 
             profile.validate();
 
-            Pair<ObjectNode, ObjectNode> modified = profile.convert(Jackson.JSON.getNodeFactory());
+            Pair<ObjectNode, ObjectNode> modified = profile.convert(Jackson.factory());
 
             LOGGER.info(" - Writing install-profile.json");
             try (OutputStream out = Files.newOutputStream(converted)) {
-                Jackson.JSON.writeValue(out, modified.left());
+                Jackson.write(out, modified.left());
             }
 
             LOGGER.info(" - Writing version.json");
             try (OutputStream out = Files.newOutputStream(versionInfo)) {
-                Jackson.JSON.writeValue(out, modified.right());
+                Jackson.write(out, modified.right());
             }
         }
     }

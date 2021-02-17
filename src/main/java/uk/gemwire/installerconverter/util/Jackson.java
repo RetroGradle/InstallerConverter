@@ -1,7 +1,8 @@
 package uk.gemwire.installerconverter.util;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -11,7 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 public abstract class Jackson {
 
@@ -27,15 +28,24 @@ public abstract class Jackson {
             .setDefaultPrettyPrinter(new DefaultPrettyPrinter().withObjectIndenter(indenter).withArrayIndenter(indenter));
     }
 
-    public static ObjectNode read(File file) throws IOException {
-        return (ObjectNode) JSON.readTree(file);
+    public static <T> T read(String content, Class<T> clazz) throws JsonProcessingException {
+        return JSON.readValue(content, clazz);
     }
 
-    public static ObjectNode read(String string) throws IOException {
-        return (ObjectNode) JSON.readTree(string);
+    public static <T> T read(InputStream stream, Class<T> clazz) throws IOException {
+        return JSON.readValue(stream, clazz);
     }
 
     public static String write(JsonNode node) throws JsonProcessingException {
-        return JSON.writer().writeValueAsString(node);
+        return JSON.writeValueAsString(node);
     }
+
+    public static void write(OutputStream stream, JsonNode node) throws IOException {
+        JSON.writeValue(stream, node);
+    }
+
+    public static JsonNodeFactory factory() {
+        return JSON.getNodeFactory();
+    }
+
 }

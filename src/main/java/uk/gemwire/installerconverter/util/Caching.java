@@ -7,12 +7,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public interface Caching {
-    Logger LOGGER = LoggerFactory.getLogger(Caching.class); // TODO: convert to class and make this private
+import uk.gemwire.installerconverter.util.exception.CachingException;
 
-    Path CACHE = Path.of(".cache");
+public abstract class Caching {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Caching.class);
 
-    static Path cached(String path, IOConsumer<Path> generator) throws CachingException {
+    private static final Path CACHE = Path.of(".cache");
+
+    public static Path cached(String path, IOConsumer<Path> generator) throws CachingException {
         try {
             Files.createDirectories(CACHE);
         } catch (IOException exception) {
@@ -21,10 +23,10 @@ public interface Caching {
         return cached(CACHE.resolve(path), generator);
     }
 
-    static Path cached(Path cached, IOConsumer<Path> generator) throws CachingException {
+    public static Path cached(Path cached, IOConsumer<Path> generator) throws CachingException {
         if (Files.exists(cached)) return cached;
 
-        System.out.printf("Caching: no cached copy of %s, running generator%n", cached);
+        LOGGER.debug("Caching: no cached copy of {}, running generator%n", cached);
 
         try {
             generator.accept(cached);
@@ -35,15 +37,5 @@ public interface Caching {
         if (!Files.exists(cached)) throw new CachingException("Generator did not generate file" + cached);
 
         return cached;
-    }
-
-    class CachingException extends RuntimeException {
-        public CachingException(String message) {
-            super(message);
-        }
-
-        public CachingException(String message, Throwable cause) {
-            super(message, cause);
-        }
     }
 }

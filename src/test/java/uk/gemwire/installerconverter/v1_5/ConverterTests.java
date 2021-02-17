@@ -36,7 +36,7 @@ public class ConverterTests {
     }
 
     void compareConversion(String expected, String data, Class<? extends IConvertable<? extends JsonNode>> clazz) throws IOException {
-        assertEquals(getTestData(expected), Jackson.JSON.writeValueAsString(Jackson.JSON.readValue(getTestData(data), clazz).convert(Jackson.JSON.getNodeFactory())).replace("\r\n", "\n"));
+        assertEquals(getTestData(expected), Jackson.write(Jackson.read(getTestData(data), clazz).convert(Jackson.factory())).replace("\r\n", "\n"));
     }
 
     String getTestData(String name) throws IOException {

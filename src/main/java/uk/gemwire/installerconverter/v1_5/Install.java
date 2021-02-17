@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import uk.gemwire.installerconverter.Config;
@@ -106,7 +105,7 @@ public final class Install implements IConvertable<ObjectNode> {
 
     @Override
     public void validate() throws IllegalStateException {
-        // TODO: Validate
+        // TODO: More Validation
 
         // Validate that the Id Conversion works for the target
         try {
@@ -151,7 +150,7 @@ public final class Install implements IConvertable<ObjectNode> {
         node.set("data", factory.objectNode());
         node.set("processors", factory.arrayNode());
 
-        //TODO: Libraries (Needs to provide the forge-universal (as forge))
+        // Add the forge library. (TODO: Check if path is the correct value for all cases we care about)
         LibraryInfo forge = new LibraryInfo();
         forge.setName(path);
         node.set("libraries", factory.arrayNode().add(forge.convert(factory)));

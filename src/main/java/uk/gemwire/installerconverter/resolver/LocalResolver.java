@@ -21,12 +21,8 @@ public class LocalResolver extends AbstractResolver {
 
     private final Path localRoot;
 
-    public LocalResolver(Path localRoot) {
-        this(localRoot, null);
-    }
-
     public LocalResolver(Path localRoot, @Nullable IResolver fallback) {
-        super(fallback);
+        super(fallback, LOGGER);
 
         this.localRoot = localRoot;
     }
