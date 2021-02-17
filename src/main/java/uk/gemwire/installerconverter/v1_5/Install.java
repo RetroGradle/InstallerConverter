@@ -108,10 +108,12 @@ public final class Install implements IConvertable<ObjectNode> {
         // TODO: More Validation
 
         // Validate that the Id Conversion works for the target
-        try {
-            Conversions.convertId(target);
-        } catch (IllegalArgumentException exception) {
-            throw new IllegalStateException(exception);
+        if (Config.CONVERT_VERSION_ID) {
+            try {
+                Conversions.convertId(target);
+            } catch (IllegalArgumentException exception) {
+                throw new IllegalStateException(exception);
+            }
         }
     }
 
@@ -125,7 +127,7 @@ public final class Install implements IConvertable<ObjectNode> {
         node.set("_comment_", Conversions.createCommentNode(factory));
         node.put("spec", 0);
         node.put("profile", profileName);
-        node.put("version", Conversions.convertId(target));
+        node.put("version", Config.CONVERT_VERSION_ID ? Conversions.convertId(target) : target);
         node.put("icon", Config.ICON); //TODO: Conversion?
         node.put("json", "/version.json");
         node.put("path", path);
