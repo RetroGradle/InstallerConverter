@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import uk.gemwire.installerconverter.raw.Converter;
 import uk.gemwire.installerconverter.resolver.CachedResolver;
 import uk.gemwire.installerconverter.resolver.LocalResolver;
 import uk.gemwire.installerconverter.resolver.RemoteResolver;
@@ -26,8 +25,6 @@ public class Main {
 
     public static void main(String... args) throws IOException {
         setup();
-
-        //printRaw();
 
         //printObj();
         InstallerConverter.convert("1.12.2-14.23.5.2847");
@@ -72,17 +69,6 @@ public class Main {
         try (Writer writer = Files.newBufferedWriter(PATH_CACHED_RESOLVER, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
             CACHED_RESOLVER.serialize(writer);
         }
-    }
-
-    public static void printRaw() throws IOException {
-        ObjectNode profile = Jackson.read(new File("src/test/resources/install_profile_1.12.2.json"));
-
-        Pair<ObjectNode, ObjectNode> modified = Converter.convertProfile(profile);
-
-        System.out.println("raw install_profile.json");
-        System.out.println(Jackson.write(modified.left()));
-        System.out.println("raw version.json");
-        System.out.println(Jackson.write(modified.right()));
     }
 
     public static void printObj() throws IOException {
