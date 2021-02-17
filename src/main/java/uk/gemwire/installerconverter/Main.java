@@ -7,9 +7,11 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import uk.gemwire.installerconverter.resolver.CachedResolver;
+import uk.gemwire.installerconverter.resolver.IResolver;
 import uk.gemwire.installerconverter.resolver.LocalResolver;
 import uk.gemwire.installerconverter.resolver.RemoteResolver;
 import uk.gemwire.installerconverter.util.Jackson;
@@ -54,7 +56,11 @@ public class Main {
     public static void setup() throws IOException { //TODO: WIRING
         Config.LOCAL_MAVEN = Path.of("local");
 
-        CACHED_RESOLVER = new CachedResolver(new LocalResolver(Config.LOCAL_MAVEN, new RemoteResolver()));
+        Function<IResolver, CachedResolver> caching = CachedResolver::new;
+        Function<IResolver, IResolver> fromLocalMaven = (f) -> new LocalResolver(Config.LOCAL_MAVEN, f);
+        Function<IResolver, IResolver> fromRemote = RemoteResolver::new;
+
+        CACHED_RESOLVER = caching.compose(fromLocalMaven).compose(fromRemote).apply(null);
 
         if (Files.exists(PATH_CACHED_RESOLVER)) {
             try (Reader reader = Files.newBufferedReader(PATH_CACHED_RESOLVER)) {
@@ -83,5 +89,4 @@ public class Main {
         System.out.println("obj version.json");
         System.out.println(Jackson.write(modified.right()));
     }
-
 }
