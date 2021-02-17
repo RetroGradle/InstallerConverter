@@ -1,5 +1,6 @@
 package uk.gemwire.installerconverter.v1_5;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -11,7 +12,7 @@ public abstract class Conversions {
         String[] parts = id.split("-", 3);
 
         if (parts.length != 3) throw new IllegalArgumentException("Invalid id length: " + id);
-        if(!parts[1].startsWith("forge")) throw new IllegalArgumentException("Invalid id: " + id);
+        if(!parts[1].toLowerCase(Locale.ROOT).startsWith("forge")) throw new IllegalArgumentException("Invalid id: " + id);
 
         return parts[0] + "-forge-" + parts[2];
     }

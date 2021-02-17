@@ -107,6 +107,13 @@ public final class Install implements IConvertable<ObjectNode> {
     @Override
     public void validate() throws IllegalStateException {
         // TODO: Validate
+
+        // Validate that the Id Conversion works for the target
+        try {
+            Conversions.convertId(target);
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalStateException(exception);
+        }
     }
 
     @Override
