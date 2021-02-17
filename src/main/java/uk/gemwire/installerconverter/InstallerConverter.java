@@ -4,9 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.StandardCopyOption;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.jimfs.Configuration;
@@ -23,10 +27,8 @@ import static java.nio.file.FileSystems.newFileSystem;
 
 public class InstallerConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(InstallerConverter.class);
-    
-    private static final String[] STRAIGHT_COPY = new String[] {
-        "CREDITS.txt", "LICENSE.txt", "LICENSE-Paulscode IBXM Library.txt", "LICENSE-Paulscode SoundSystem CodecIBXM.txt"
-    };
+
+    private static final PathMatcher TXT_MATCHER = FileSystems.getDefault().getPathMatcher("glob:*.txt");
 
     public static void convert(String version) throws IOException {
         convert(Config.LOCAL_MAVEN.resolve(Artifact.of("net.minecraftforge:forge:{version}:installer".replace("{version}", version)).asPath()), version);
@@ -84,7 +86,15 @@ public class InstallerConverter {
 
             // Copy Files
             LOGGER.info(" - Copying other files");
-            for (String file : STRAIGHT_COPY) copy(installer, output, file); //TODO: Instead filter for .txt's missing changelog.txt?
+            for (String file : Files.list(installer.getPath("/")).map(Path::getFileName).filter(TXT_MATCHER::matches).map(Path::toString).collect(Collectors.toList())) {
+                if (file.toLowerCase(Locale.ROOT).endsWith("changelog.txt")) {
+                    LOGGER.info("   - Skipping {}", file);
+                    continue;
+                }
+
+                LOGGER.info("   - Copying {}", file);
+                copy(installer, output, file);
+            }
         }
         // (FSs are closed here; important for the output.jar so the contents are written)
         // Copy the resulting jar
