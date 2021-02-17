@@ -1,12 +1,15 @@
 package uk.gemwire.installerconverter.raw;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.io.Resources;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import uk.gemwire.installerconverter.Main;
@@ -14,7 +17,9 @@ import uk.gemwire.installerconverter.util.Jackson;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
+@Disabled("TODO: Remove Raw Conversions")
 public class ConverterTests {
 
     @BeforeAll
@@ -46,7 +51,13 @@ public class ConverterTests {
     }
 
     String getTestData(String name) throws IOException {
-        return Files.readString(Path.of("src/test/resources/data/" + name));
+        try {
+            //noinspection UnstableApiUsage
+            return Files.readString(Path.of(Resources.getResource("data/" + name).toURI())).replace("\r\n", "\n");
+        } catch (URISyntaxException e) {
+            fail("Failed to create URI for test data " + name);
+            return null;
+        }
     }
 
 }

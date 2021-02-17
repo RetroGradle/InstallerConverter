@@ -17,24 +17,13 @@
     "processors" : [ ],
     "libraries" : [
         {
-            "name" : "de.oceanlabs.mcp:mcp_config:1.12.2-20200226.224830@zip",
-            "downloads" : {
-                "artifact" : {
-                    "path" : "de/oceanlabs/mcp/mcp_config/1.12.2-20200226.224830/mcp_config-1.12.2-20200226.224830.zip",
-                    "url" : "https://files.minecraftforge.net/maven/de/oceanlabs/mcp/mcp_config/1.12.2-20200226.224830/mcp_config-1.12.2-20200226.224830.zip",
-                    "sha1" : "72e1b936f56e0dd394c64caf9c86af01f64dc979",
-                    "size" : 421086
-                }
-            }
-        },
-        {
             "name" : "net.minecraftforge:forge:1.12.2-14.23.5.2847",
             "downloads" : {
                 "artifact" : {
                     "path" : "net/minecraftforge/forge/1.12.2-14.23.5.2847/forge-1.12.2-14.23.5.2847.jar",
                     "url" : "",
-                    "sha1" : "52cecb6a3fbd765599b976dca445b21f33ab5634",
-                    "size" : 4464387
+                    "sha1" : "c15dbf708064a9db9a9d66dd84688b9f31b6006e",
+                    "size" : 4884700
                 }
             }
         }

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.io.Resources;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.Main;
 import uk.gemwire.installerconverter.util.IConvertable;
 import uk.gemwire.installerconverter.util.Jackson;
@@ -21,6 +22,7 @@ public class ConverterTests {
     @BeforeAll
     static void setup() throws IOException {
         Main.setup();
+        Config.ICON = "{ICON}";
     }
 
     @Test
@@ -34,13 +36,13 @@ public class ConverterTests {
     }
 
     void compareConversion(String expected, String data, Class<? extends IConvertable<? extends JsonNode>> clazz) throws IOException {
-        assertEquals(getTestData(expected), Jackson.write(Jackson.JSON.readValue(getTestData(data), clazz).convert(Jackson.JSON.getNodeFactory())));
+        assertEquals(getTestData(expected), Jackson.JSON.writeValueAsString(Jackson.JSON.readValue(getTestData(data), clazz).convert(Jackson.JSON.getNodeFactory())).replace("\r\n", "\n"));
     }
 
     String getTestData(String name) throws IOException {
         try {
             //noinspection UnstableApiUsage
-            return Files.readString(Path.of(Resources.getResource("data/" + name).toURI()));
+            return Files.readString(Path.of(Resources.getResource("data/" + name).toURI())).replace("\r\n", "\n");
         } catch (URISyntaxException e) {
             fail("Failed to create URI for test data " + name);
             return null;
