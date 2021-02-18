@@ -79,9 +79,7 @@ public class NIOJarSigner {
             }
             if (!privateKey.getAlgorithm().equals
                 (certs.get(0).getPublicKey().getAlgorithm())) {
-                throw new IllegalArgumentException
-                    ("private key algorithm does not match " +
-                        "algorithm of public key in end entity " +
+                throw new IllegalArgumentException("private key algorithm does not match algorithm of public key in end entity " +
                         "certificate (the 1st in certPath)");
             }
             this.privateKey = privateKey;
@@ -150,8 +148,7 @@ public class NIOJarSigner {
                         (c >= '0' && c <= '9') ||
                         (c == '-') ||
                         (c == '_'))) {
-                    throw new IllegalArgumentException(
-                        "Invalid characters in name");
+                    throw new IllegalArgumentException("Invalid characters in name");
                 }
             }
             this.signerName = name;
@@ -171,8 +168,7 @@ public class NIOJarSigner {
                     try {
                         MessageDigest.getInstance(value);
                     } catch (NoSuchAlgorithmException nsae) {
-                        throw new IllegalArgumentException(
-                            "Invalid tsadigestalg", nsae);
+                        throw new IllegalArgumentException("Invalid tsadigestalg", nsae);
                     }
                     this.tSADigestAlg = value;
                     break;
@@ -200,8 +196,7 @@ public class NIOJarSigner {
                     altSigner = value;
                     break;
                 default:
-                    throw new UnsupportedOperationException(
-                        "Unsupported key " + key);
+                    throw new UnsupportedOperationException("Unsupported key " + key);
             }
             return this;
         }
@@ -253,8 +248,7 @@ public class NIOJarSigner {
             this.sigalg = JarSigner.Builder
                 .getDefaultSignatureAlgorithm(privateKey);
             if (this.sigalg == null) {
-                throw new IllegalArgumentException(
-                    "No signature alg for " + privateKey.getAlgorithm());
+                throw new IllegalArgumentException("No signature alg for " + privateKey.getAlgorithm());
             }
         }
         this.sigProvider = builder.sigProvider;
@@ -347,12 +341,10 @@ public class NIOJarSigner {
             } else {
                 // Create new manifest
                 Attributes mattr = manifest.getMainAttributes();
-                mattr.putValue(Attributes.Name.MANIFEST_VERSION.toString(),
-                    "1.0");
+                mattr.putValue(Attributes.Name.MANIFEST_VERSION.toString(), "1.0");
                 String javaVendor = System.getProperty("java.vendor");
                 String jdkVersion = System.getProperty("java.version");
-                mattr.putValue("Created-By", jdkVersion + " (" + javaVendor
-                    + ")");
+                mattr.putValue("Created-By", jdkVersion + " (" + javaVendor + ")");
                 mfFile = Path.of(JarFile.MANIFEST_NAME);
             }
 
@@ -480,8 +472,7 @@ public class NIOJarSigner {
 
             // Calculate SignatureFile (".SF") and SignatureBlockFile
             ManifestDigester manDig = new ManifestDigester(mfRawBytes);
-            SignatureFile sf = new SignatureFile(digest, manifest, manDig,
-                signerName, signManifest);
+            SignatureFile sf = new SignatureFile(digest, manifest, manDig, signerName, signManifest);
 
             byte[] block;
 
@@ -507,8 +498,7 @@ public class NIOJarSigner {
             }
 
             @SuppressWarnings("removal")
-            ContentSignerParameters params =
-                new NIOJarSignerParameters(null, tsaUrl, tSAPolicyID, tSADigestAlg, signature, signer.getAlgorithm(), certChain, content);
+            ContentSignerParameters params = new NIOJarSignerParameters(null, tsaUrl, tSAPolicyID, tSADigestAlg, signature, signer.getAlgorithm(), certChain, content);
             block = sf.generateBlock(params, externalSF, signingMechanism);
 
             String sfFilename = sf.getMetaName();
@@ -702,10 +692,8 @@ public class NIOJarSigner {
         String cpString;   // make sure env.class.path defaults to dot
 
         // do prepends to get correct ordering
-        cpString = PathList.appendPath(
-            System.getProperty("env.class.path"), null);
-        cpString = PathList.appendPath(
-            System.getProperty("java.class.path"), cpString);
+        cpString = PathList.appendPath(System.getProperty("env.class.path"), null);
+        cpString = PathList.appendPath(System.getProperty("java.class.path"), cpString);
         cpString = PathList.appendPath(signerClassPath, cpString);
         URL[] urls = PathList.pathToURLs(cpString);
         ClassLoader appClassLoader = new URLClassLoader(urls);
@@ -718,21 +706,13 @@ public class NIOJarSigner {
         } catch (ClassNotFoundException | InstantiationException |
             IllegalAccessException | ClassCastException |
             NoSuchMethodException | InvocationTargetException e) {
-            throw new IllegalArgumentException(
-                "Invalid altSigner or altSignerPath", e);
+            throw new IllegalArgumentException("Invalid altSigner or altSignerPath", e);
         }
     }
 
     static class SignatureFile {
 
-        /**
-         * SignatureFile
-         */
         Manifest sf;
-
-        /**
-         * .SF base name
-         */
         String baseName;
 
         public SignatureFile(MessageDigest digest,
@@ -754,20 +734,16 @@ public class NIOJarSigner {
 
             if (signManifest) {
                 mattr.putValue(digest.getAlgorithm() + "-Digest-Manifest",
-                    Base64.getEncoder().encodeToString(
-                        md.manifestDigest(digest)));
+                    Base64.getEncoder().encodeToString(md.manifestDigest(digest)));
             }
 
             // create digest of the manifest main attributes
             ManifestDigester.Entry mde = md.getMainAttsEntry(false);
             if (mde != null) {
-                mattr.putValue(digest.getAlgorithm() + "-Digest-" +
-                        ManifestDigester.MF_MAIN_ATTRS,
+                mattr.putValue(digest.getAlgorithm() + "-Digest-" + ManifestDigester.MF_MAIN_ATTRS,
                     Base64.getEncoder().encodeToString(mde.digest(digest)));
             } else {
-                throw new IllegalStateException
-                    ("ManifestDigester failed to create " +
-                        "Manifest-Main-Attribute entry");
+                throw new IllegalStateException("ManifestDigester failed to create Manifest-Main-Attribute entry");
             }
 
             // go through the manifest entries and create the digests
@@ -818,8 +794,7 @@ public class NIOJarSigner {
             return signingMechanism.generateSignedData(
                 params,
                 externalSF,
-                params.getTimestampingAuthority() != null
-                    || params.getTimestampingAuthorityCertificate() != null);
+                params.getTimestampingAuthority() != null || params.getTimestampingAuthorityCertificate() != null);
         }
     }
 
