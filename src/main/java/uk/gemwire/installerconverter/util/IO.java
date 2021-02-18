@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 
+import com.google.common.base.Charsets;
+
 public abstract class IO {
 
     private static final int BUFFER_SIZE = 0x10000;
@@ -21,6 +23,10 @@ public abstract class IO {
         }
 
         return size;
+    }
+
+    public static String toString(InputStream stream) throws IOException {
+        return toString(stream, Charsets.UTF_8);
     }
 
     public static String toString(InputStream stream, Charset charset) throws IOException {

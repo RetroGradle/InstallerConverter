@@ -12,19 +12,21 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.util.Hashing;
-import uk.gemwire.installerconverter.util.maven.Maven;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
+import uk.gemwire.installerconverter.util.maven.Maven;
 
 public class LocalResolver extends AbstractResolver {
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalResolver.class);
 
     private final Path localRoot;
+    private final boolean checkRemote;
 
-    public LocalResolver(Path localRoot, @Nullable IResolver fallback) {
+    public LocalResolver(Path localRoot, boolean checkRemote, @Nullable IResolver fallback) {
         super(fallback, LOGGER);
 
         this.localRoot = localRoot;
+        this.checkRemote = checkRemote;
     }
 
     @Override
@@ -35,12 +37,16 @@ public class LocalResolver extends AbstractResolver {
 
         // If we don't have a local copy return
         if (!Files.exists(local)) return null;
-
         LOGGER.trace("Checking for local copy of artifact {} (of host {})", artifact, host);
 
         try (InputStream stream = Files.newInputStream(local, StandardOpenOption.READ)) {
             // Otherwise calculate from Local
             CachedArtifactInfo fromLocal = Hashing.calculateSHA1andSize(stream);
+
+            if (!checkRemote) {
+                LOGGER.warn("Using local copy of artifact {} from host {}", artifact, host);
+                return fromLocal;
+            }
 
             try {
                 // Download the remote sha1

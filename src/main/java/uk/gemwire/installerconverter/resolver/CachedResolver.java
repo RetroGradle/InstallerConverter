@@ -77,7 +77,6 @@ public class CachedResolver implements IResolver {
                     cache.put(Pair.of(parts[0], Artifact.of(parts[1])), new CachedArtifactInfo(parts[2], Long.parseLong(parts[3])));
                 });
         }
-
     }
 
 }

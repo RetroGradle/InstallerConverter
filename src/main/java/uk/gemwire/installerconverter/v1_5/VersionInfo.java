@@ -14,12 +14,15 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.IConvertable;
 import uk.gemwire.installerconverter.util.JacksonUsed;
+import uk.gemwire.installerconverter.util.Pair;
+import uk.gemwire.installerconverter.util.VersionManifest;
+import uk.gemwire.installerconverter.util.maven.Artifact;
 
 /**
  * This is actually an older https://minecraft.gamepedia.com/Client.json that we're upgrading to the newer standard
  * TODO: More Testing / Better Conversion
  */
-public final class VersionInfo implements IConvertable<ObjectNode, Config> {
+public final class VersionInfo implements IConvertable<ObjectNode, Pair<Config, String>> {
 
     private final Map<String, JsonNode> data = new HashMap<>();
 
@@ -50,8 +53,17 @@ public final class VersionInfo implements IConvertable<ObjectNode, Config> {
     }
 
     @Override
-    public ObjectNode convert(Config config, JsonNodeFactory factory) throws IOException {
+    public ObjectNode convert(Pair<Config, String> context, JsonNodeFactory factory) throws IOException {
         ObjectNode node = factory.objectNode();
+
+        // Legacy Forge Conversion (1.6.x / 1.5.x)
+        if (libraries.stream().map(LibraryInfo::getGav).map(Artifact::artifact).anyMatch(artifact -> Objects.equals("minecraftforge", artifact))) {
+            List<String> inheritLibraries = VersionManifest.provideLibraries(context.right());
+
+            libraries.removeIf(library -> inheritLibraries.contains(library.getGav().asStringWithClassifier()));
+
+            if (!data.containsKey("inheritsFrom")) data.put("inheritsFrom", factory.textNode(context.right()));
+        }
 
         // Remove `jar` if == `inheritsFrom`
         potentiallyRemoveJar();
@@ -78,7 +90,7 @@ public final class VersionInfo implements IConvertable<ObjectNode, Config> {
         // Convert Libraries
         List<ObjectNode> libs = new ArrayList<>();
         for (LibraryInfo library : libraries) {
-            libs.add(library.convert(config, factory));
+            libs.add(library.convert(context, factory));
         }
 
         node.set("libraries", factory.arrayNode().addAll(libs));

@@ -23,9 +23,16 @@ public record Config(String installerVersion, boolean overrideBigLogo, String ic
         return new Config("2.0.17", false, DEFAULT_ICON, Path.of(".cache/local"), "https://files.minecraftforge.net/maven/", new RemoteResolver(null));
     }
 
+    public Config withAdditionalLocalMaven(Path memoryMaven) {
+        Function<IResolver, IResolver> caching = CachedResolver::new;
+        Function<IResolver, IResolver> fromMemoryMaven = (f) -> new LocalResolver(memoryMaven, true, f);
+
+        return withResolver(caching.compose(fromMemoryMaven).apply(resolver));
+    }
+
     public Config withCachingResolver() {
         Function<IResolver, IResolver> caching = CachedResolver::new;
-        Function<IResolver, IResolver> fromLocalMaven = (f) -> new LocalResolver(localMaven, f);
+        Function<IResolver, IResolver> fromLocalMaven = (f) -> new LocalResolver(localMaven, false, f);
         Function<IResolver, IResolver> fromRemote = RemoteResolver::new;
         return withResolver(caching.compose(fromLocalMaven).compose(fromRemote).apply(null));
     }
@@ -64,7 +71,7 @@ public record Config(String installerVersion, boolean overrideBigLogo, String ic
     }
 
     public Config teardown() throws IOException {
-        try (Writer writer = Files.newBufferedWriter(PATH_CACHED_RESOLVER, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
+        try (Writer writer = Files.newBufferedWriter(PATH_CACHED_RESOLVER, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
             resolver().serialize(writer);
         }
         return this;

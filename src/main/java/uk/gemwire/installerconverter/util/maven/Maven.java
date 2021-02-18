@@ -29,7 +29,7 @@ public abstract class Maven {
 
     public static String downloadSha1(URL url) throws IOException {
         try (InputStream stream = download(url)) {
-            return IO.toString(stream, Charsets.UTF_8).trim();
+            return IO.toString(stream).trim();
         }
     }
 

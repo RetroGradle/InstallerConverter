@@ -1,3 +1,84 @@
 {
-  
+    "_comment_" : [
+        "Please do not automate the download and installation of Forge.",
+        "Our efforts are supported by ads from the download page.",
+        "If you MUST automate this, please consider supporting the project through https://www.patreon.com/LexManos/"
+    ],
+    "id" : "1.6.4-forge-9.11.1.965",
+    "time" : "2013-12-18T00:41:38-0500",
+    "releaseTime" : "1960-01-01T00:00:00-0700",
+    "type" : "release",
+    "mainClass" : "net.minecraft.launchwrapper.Launch",
+    "inheritsFrom" : "1.6.4",
+    "minecraftArguments" : "--username ${auth_player_name} --session ${auth_session} --version ${version_name} --gameDir ${game_directory} --assetsDir ${game_assets} --tweakClass cpw.mods.fml.common.launcher.FMLTweaker",
+    "minimumLauncherVersion" : 4,
+    "processArguments" : "username_session_version",
+    "libraries" : [
+        {
+            "name" : "net.minecraftforge:forge:1.6.4-9.11.1.965",
+            "downloads" : {
+                "artifact" : {
+                    "path" : "net/minecraftforge/forge/1.6.4-9.11.1.965/forge-1.6.4-9.11.1.965.jar",
+                    "url" : "",
+                    "sha1" : "36cc314edb97df84528382d5c3d2cce46d75de11",
+                    "size" : 1972443
+                }
+            }
+        },
+        {
+            "name" : "net.minecraft:launchwrapper:1.8",
+            "downloads" : {
+                "artifact" : {
+                    "path" : "net/minecraft/launchwrapper/1.8/launchwrapper-1.8.jar",
+                    "url" : "https://libraries.minecraft.net/net/minecraft/launchwrapper/1.8/launchwrapper-1.8.jar",
+                    "sha1" : "d4c0895977dd7f0b3f56281cee53a64d4c0c0322",
+                    "size" : 28927
+                }
+            }
+        },
+        {
+            "name" : "org.ow2.asm:asm-all:4.1",
+            "downloads" : {
+                "artifact" : {
+                    "path" : "org/ow2/asm/asm-all/4.1/asm-all-4.1.jar",
+                    "url" : "https://libraries.minecraft.net/org/ow2/asm/asm-all/4.1/asm-all-4.1.jar",
+                    "sha1" : "054986e962b88d8660ae4566475658469595ef58",
+                    "size" : 214592
+                }
+            }
+        },
+        {
+            "name" : "org.scala-lang:scala-library:2.10.2",
+            "downloads" : {
+                "artifact" : {
+                    "path" : "org/scala-lang/scala-library/2.10.2/scala-library-2.10.2.jar",
+                    "url" : "https://files.minecraftforge.net/maven/org/scala-lang/scala-library/2.10.2/scala-library-2.10.2.jar",
+                    "sha1" : "6ba65d12cd09d441083262d6f73d2257fec7c663",
+                    "size" : 7121818
+                }
+            }
+        },
+        {
+            "name" : "org.scala-lang:scala-compiler:2.10.2",
+            "downloads" : {
+                "artifact" : {
+                    "path" : "org/scala-lang/scala-compiler/2.10.2/scala-compiler-2.10.2.jar",
+                    "url" : "https://files.minecraftforge.net/maven/org/scala-lang/scala-compiler/2.10.2/scala-compiler-2.10.2.jar",
+                    "sha1" : "64c8b1380cc53d6850823d6e4e7ae984aa44ef9c",
+                    "size" : 14411577
+                }
+            }
+        },
+        {
+            "name" : "lzma:lzma:0.0.1",
+            "downloads" : {
+                "artifact" : {
+                    "path" : "lzma/lzma/0.0.1/lzma-0.0.1.jar",
+                    "url" : "https://libraries.minecraft.net/lzma/lzma/0.0.1/lzma-0.0.1.jar",
+                    "sha1" : "521616dc7487b42bef0e803bd2fa3faf668101d7",
+                    "size" : 5762
+                }
+            }
+        }
+    ]
 }

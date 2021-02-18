@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public abstract class Jackson {
 
@@ -26,6 +27,10 @@ public abstract class Jackson {
             .enable(SerializationFeature.INDENT_OUTPUT)
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
             .setDefaultPrettyPrinter(new DefaultPrettyPrinter().withObjectIndenter(indenter).withArrayIndenter(indenter));
+    }
+
+    public static ObjectNode read(String content) throws JsonProcessingException {
+        return (ObjectNode) JSON.readTree(content);
     }
 
     public static <T> T read(String content, Class<T> clazz) throws JsonProcessingException {

@@ -51,6 +51,6 @@ public final class InstallProfile implements IConvertable<Pair<ObjectNode, Objec
 
     @Override
     public Pair<ObjectNode, ObjectNode> convert(Config config, JsonNodeFactory factory) throws IOException {
-        return Pair.of(install.convert(config, factory), versionInfo.convert(config, factory));
+        return Pair.of(install.convert(config, factory), versionInfo.convert(Pair.of(config, install.getMinecraft()), factory));
     }
 }

@@ -9,7 +9,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.Locale;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -29,6 +31,8 @@ public class InstallerConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(InstallerConverter.class);
 
     private static final PathMatcher TXT_MATCHER = FileSystems.getDefault().getPathMatcher("glob:*.txt");
+    private static final PathMatcher JAR_MATCHER = FileSystems.getDefault().getPathMatcher("glob:*.jar");
+    private static final Predicate<String> UNIVERSAL_FORGE = (value) -> value.contains("universal") && value.contains("forge");
 
     public static void convert(Config config, String version) throws IOException {
         convert(config, config.localMaven().resolve(Artifact.of("net.minecraftforge:forge:{version}:installer".replace("{version}", version)).asPath()), version);
@@ -65,19 +69,27 @@ public class InstallerConverter {
                 return;
             }
 
+            // Copy `forge-{version}-universal.jar` to `maven/net/minecraftforge/forge/{version}/forge-{version}.jar`
+            LOGGER.info(" - Copying universal jar");
+            Files.createDirectories(output.getPath("maven/net/minecraftforge/forge/{version}".replace("{version}", version)));
+            try {
+                Files.copy(installer.getPath("forge-{version}-universal.jar".replace("{version}", version)), output.getPath("maven/net/minecraftforge/forge/{version}/forge-{version}.jar".replace("{version}", version)));
+            } catch (IOException exception) {
+                List<String> jars = Files.list(installer.getPath("/")).map(Path::getFileName).filter(JAR_MATCHER::matches).map(Path::toString).filter(UNIVERSAL_FORGE).collect(Collectors.toList());
+
+                if (jars.size() != 1) throw new IllegalStateException("Could not identify Universal Jar for version " + version);
+
+                Files.copy(installer.getPath(jars.get(0)), output.getPath("maven/net/minecraftforge/forge/{version}/forge-{version}.jar".replace("{version}", version)));
+            }
+
             // Convert `install_profile.json` -> `install_profile.json` & `version.json`
             LOGGER.info(" - Converting install profile");
             convertProfile(
-                config,
+                config.withAdditionalLocalMaven(output.getPath("maven/")),
                 installer.getPath("install_profile.json"),
                 output.getPath("install_profile.json"),
                 output.getPath("version.json")
             );
-
-            // Copy `forge-{version}-universal.jar` to `maven/net/minecraftforge/forge/{version}/forge-{version}.jar`
-            LOGGER.info(" - Copying universal jar");
-            Files.createDirectories(output.getPath("maven/net/minecraftforge/forge/{version}".replace("{version}", version)));
-            Files.copy(installer.getPath("forge-{version}-universal.jar".replace("{version}", version)), output.getPath("maven/net/minecraftforge/forge/{version}/forge-{version}.jar".replace("{version}", version)));
 
             // Optionally Copy Big Logo
             if (config.overrideBigLogo()) {

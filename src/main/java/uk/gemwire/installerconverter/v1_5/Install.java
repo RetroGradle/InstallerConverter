@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.IConvertable;
 import uk.gemwire.installerconverter.util.JacksonUsed;
+import uk.gemwire.installerconverter.util.Pair;
 
 public final class Install implements IConvertable<ObjectNode, Config> {
 
@@ -103,9 +104,14 @@ public final class Install implements IConvertable<ObjectNode, Config> {
         this.hideExtract = hideExtract;
     }
 
+    public String getMinecraft() {
+        return minecraft;
+    }
+
     @Override
     public void validate() throws IllegalStateException {
         // TODO: More Validation
+        if (minecraft == null) throw new IllegalStateException("No Minecraft Version Specified");
 
         // Validate that the Id Conversion works for the target
         try {
@@ -153,7 +159,8 @@ public final class Install implements IConvertable<ObjectNode, Config> {
         // Add the forge library. (TODO: Check if path is the correct value for all cases we care about)
         LibraryInfo forge = new LibraryInfo();
         forge.setName(path);
-        node.set("libraries", factory.arrayNode().add(forge.convert(config, factory)));
+        forge.setUrl(config.baseMaven());
+        node.set("libraries", factory.arrayNode().add(forge.convert(Pair.of(config, minecraft), factory)));
 
         return node;
     }
