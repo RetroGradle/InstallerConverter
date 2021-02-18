@@ -868,7 +868,7 @@ public class NIOJarSigner {
         }
 
         public ZipFile getSource() {
-            throw new UnsupportedOperationException();
+            return null;
         }
     }
 }
