@@ -1,6 +1,9 @@
 package uk.gemwire.installerconverter;
 
+import uk.gemwire.installerconverter.util.NIOJarSigner;
+
 import java.io.IOException;
+import java.security.PrivateKey;
 
 /**
  * @author RetroGradle
