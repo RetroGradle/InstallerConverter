@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.io.Resources;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.IConvertable;
 import uk.gemwire.installerconverter.util.Jackson;
@@ -19,16 +21,17 @@ public class ConverterTests {
 
     @Test
     void convertInstall() throws IOException {
-        compareConversion("install_profile_obj.json", "install_profile_install.json", Install.class);
+        compareConversion("1.12.2", "install-profile", Install.class);
     }
 
-    @Test
-    void convertVersionInfo() throws IOException {
-        compareConversion("version_info_obj.json", "install_profile_version_info.json", VersionInfo.class);
+    @ParameterizedTest
+    @ValueSource(strings = {"1.6.4", "1.12.2"})
+    void convertVersionInfo(final String version) throws IOException {
+        compareConversion(version, "version-info", VersionInfo.class);
     }
 
-    void compareConversion(String expected, String data, Class<? extends IConvertable<? extends JsonNode, Config>> clazz) throws IOException {
-        compareConversion(expected, data, clazz, Config
+    void compareConversion(String version, String name, Class<? extends IConvertable<? extends JsonNode, Config>> clazz) throws IOException {
+        compareConversion(version + "/" + name + ".expected.json", version + "/" + name + ".input.json", clazz, Config
             .withDefaults()
             .withIcon("{ICON}")
             .withCachingResolver() //TODO: .withResolver(TestResolver)
