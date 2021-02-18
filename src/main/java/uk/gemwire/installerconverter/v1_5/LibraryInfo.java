@@ -14,7 +14,7 @@ import uk.gemwire.installerconverter.util.JacksonUsed;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 
-public final class LibraryInfo implements IConvertable<ObjectNode> {
+public final class LibraryInfo implements IConvertable<ObjectNode, Config> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LibraryInfo.class);
 
@@ -55,7 +55,7 @@ public final class LibraryInfo implements IConvertable<ObjectNode> {
     }
 
     @Override
-    public ObjectNode convert(JsonNodeFactory factory) throws IOException {
+    public ObjectNode convert(Config config, JsonNodeFactory factory) throws IOException {
         //TODO: Handle clientreq / serverreq - What do we need to do with them
 
         ObjectNode downloads = factory.objectNode();
@@ -63,11 +63,11 @@ public final class LibraryInfo implements IConvertable<ObjectNode> {
         //TODO: Testing
         if (gav.classifier() != null) {
             ObjectNode classifiers = factory.objectNode();
-            classifiers.set(gav.classifier(), convertArtifact(factory));
+            classifiers.set(gav.classifier(), convertArtifact(config, factory));
 
             downloads.set("classifiers", classifiers);
         } else {
-            downloads.set("artifact", convertArtifact(factory));
+            downloads.set("artifact", convertArtifact(config, factory));
         }
 
         ObjectNode node = factory.objectNode();
@@ -77,7 +77,7 @@ public final class LibraryInfo implements IConvertable<ObjectNode> {
         return node;
     }
 
-    public ObjectNode convertArtifact(JsonNodeFactory factory) throws IOException {
+    public ObjectNode convertArtifact(Config config, JsonNodeFactory factory) throws IOException {
         boolean isForge = Objects.equals(gav.artifact(), "forge");
 
         String path = gav.asPath();
@@ -89,7 +89,7 @@ public final class LibraryInfo implements IConvertable<ObjectNode> {
         artifact.put("path", path);
         artifact.put("url", isForge ? "" : finalURL);
         //TODO: The forge gav should be grabbed from the inMemoryFs if possible
-        CachedArtifactInfo data = Config.RESOLVER.resolve(isForge ? Config.BASE_MAVEN : url, isForge ? Artifact.of(gav.asString() + ":universal") : gav);
+        CachedArtifactInfo data = config.resolver().resolve(isForge ? config.baseMaven() : url, isForge ? Artifact.of(gav.asString() + ":universal") : gav);
 
         if (data == null) throw new IOException(String.format("Couldn't get Sha1 or Size for '%s' from '%s'", gav.asStringWithClassifier(), url));
 

@@ -10,7 +10,7 @@ import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.IConvertable;
 import uk.gemwire.installerconverter.util.JacksonUsed;
 
-public final class Install implements IConvertable<ObjectNode> {
+public final class Install implements IConvertable<ObjectNode, Config> {
 
     private String profileName;
     private String target;
@@ -108,17 +108,15 @@ public final class Install implements IConvertable<ObjectNode> {
         // TODO: More Validation
 
         // Validate that the Id Conversion works for the target
-        if (Config.CONVERT_VERSION_ID) {
-            try {
-                Conversions.convertId(target);
-            } catch (IllegalArgumentException exception) {
-                throw new IllegalStateException(exception);
-            }
+        try {
+            Conversions.convertId(target);
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalStateException(exception);
         }
     }
 
     @Override
-    public ObjectNode convert(JsonNodeFactory factory) throws IOException {
+    public ObjectNode convert(Config config, JsonNodeFactory factory) throws IOException {
         ObjectNode node = factory.objectNode();
 
         /* Skip MirrorList if it's forges - TODO: Check this is correct */
@@ -127,8 +125,8 @@ public final class Install implements IConvertable<ObjectNode> {
         node.set("_comment_", Conversions.createCommentNode(factory));
         node.put("spec", 0);
         node.put("profile", profileName);
-        node.put("version", Config.CONVERT_VERSION_ID ? Conversions.convertId(target) : target);
-        node.put("icon", Config.ICON); //TODO: Conversion?
+        node.put("version", Conversions.convertId(target));
+        node.put("icon", config.icon()); //TODO: Conversion?
         node.put("json", "/version.json");
         node.put("path", path);
         node.put("logo", logo);
@@ -155,7 +153,7 @@ public final class Install implements IConvertable<ObjectNode> {
         // Add the forge library. (TODO: Check if path is the correct value for all cases we care about)
         LibraryInfo forge = new LibraryInfo();
         forge.setName(path);
-        node.set("libraries", factory.arrayNode().add(forge.convert(factory)));
+        node.set("libraries", factory.arrayNode().add(forge.convert(config, factory)));
 
         return node;
     }

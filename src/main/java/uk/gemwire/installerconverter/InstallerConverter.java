@@ -30,11 +30,11 @@ public class InstallerConverter {
 
     private static final PathMatcher TXT_MATCHER = FileSystems.getDefault().getPathMatcher("glob:*.txt");
 
-    public static void convert(String version) throws IOException {
-        convert(Config.LOCAL_MAVEN.resolve(Artifact.of("net.minecraftforge:forge:{version}:installer".replace("{version}", version)).asPath()), version);
+    public static void convert(Config config, String version) throws IOException {
+        convert(config, config.localMaven().resolve(Artifact.of("net.minecraftforge:forge:{version}:installer".replace("{version}", version)).asPath()), version);
     }
 
-    public static void convert(Path inputInstaller, String version) throws IOException {
+    public static void convert(Config config, Path inputInstaller, String version) throws IOException {
         LOGGER.info("Converting Installer for version " + version);
 
         // The main in-memory FileSystem (Jimfs)
@@ -47,7 +47,7 @@ public class InstallerConverter {
 
         // Get Installer Base (downloaded and/or cached)
         LOGGER.info(" - Retrieving base installer");
-        Path installerBase = Installers.provide(Config.INSTALLER_VERSION);
+        Path installerBase = Installers.provide(config);
 
         // Get the path to the in-memory output jar
         LOGGER.info(" - Copying base installer to memory");
@@ -68,6 +68,7 @@ public class InstallerConverter {
             // Convert `install_profile.json` -> `install_profile.json` & `version.json`
             LOGGER.info(" - Converting install profile");
             convertProfile(
+                config,
                 installer.getPath("install_profile.json"),
                 output.getPath("install_profile.json"),
                 output.getPath("version.json")
@@ -79,7 +80,7 @@ public class InstallerConverter {
             Files.copy(installer.getPath("forge-{version}-universal.jar".replace("{version}", version)), output.getPath("maven/net/minecraftforge/forge/{version}/forge-{version}.jar".replace("{version}", version)));
 
             // Optionally Copy Big Logo
-            if (Config.OVERRIDE_INSTALLER_BIG_LOGO) {
+            if (config.overrideBigLogo()) {
                 LOGGER.info(" - Copying big_logo.png");
                 copy(installer, output, "big_logo.png");
             }
@@ -107,13 +108,13 @@ public class InstallerConverter {
         LOGGER.info("Conversion of Installer for version {} is complete.", version);
     }
 
-    private static void convertProfile(Path original, Path converted, Path versionInfo) throws IOException {
+    private static void convertProfile(Config config, Path original, Path converted, Path versionInfo) throws IOException {
         try (InputStream stream = Files.newInputStream(original)) {
             InstallProfile profile = Jackson.read(stream, InstallProfile.class);
 
             profile.validate();
 
-            Pair<ObjectNode, ObjectNode> modified = profile.convert(Jackson.factory());
+            Pair<ObjectNode, ObjectNode> modified = profile.convert(config, Jackson.factory());
 
             LOGGER.info(" - Writing install-profile.json");
             try (OutputStream out = Files.newOutputStream(converted)) {

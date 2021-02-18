@@ -34,6 +34,7 @@ public class CachedResolver implements IResolver {
         });
     }
 
+    @Override
     public void serialize(Writer writer) throws IOException {
         for (Map.Entry<Pair<String, Artifact>, CachedArtifactInfo> entry : cache.entrySet()) {
             Pair<String, Artifact> k = entry.getKey();
@@ -58,6 +59,7 @@ public class CachedResolver implements IResolver {
         writer.flush();
     }
 
+    @Override
     public void deserialize(Reader reader) throws IOException {
         cache.clear();
 

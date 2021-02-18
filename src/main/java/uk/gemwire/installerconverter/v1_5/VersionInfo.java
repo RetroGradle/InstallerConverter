@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.IConvertable;
 import uk.gemwire.installerconverter.util.JacksonUsed;
 
@@ -18,7 +19,7 @@ import uk.gemwire.installerconverter.util.JacksonUsed;
  * This is actually an older https://minecraft.gamepedia.com/Client.json that we're upgrading to the newer standard
  * TODO: More Testing / Better Conversion
  */
-public final class VersionInfo implements IConvertable<ObjectNode> {
+public final class VersionInfo implements IConvertable<ObjectNode, Config> {
 
     private final Map<String, JsonNode> data = new HashMap<>();
 
@@ -49,7 +50,7 @@ public final class VersionInfo implements IConvertable<ObjectNode> {
     }
 
     @Override
-    public ObjectNode convert(JsonNodeFactory factory) throws IOException {
+    public ObjectNode convert(Config config, JsonNodeFactory factory) throws IOException {
         ObjectNode node = factory.objectNode();
 
         // Remove `jar` if == `inheritsFrom`
@@ -77,7 +78,7 @@ public final class VersionInfo implements IConvertable<ObjectNode> {
         // Convert Libraries
         List<ObjectNode> libs = new ArrayList<>();
         for (LibraryInfo library : libraries) {
-            libs.add(library.convert(factory));
+            libs.add(library.convert(config, factory));
         }
 
         node.set("libraries", factory.arrayNode().addAll(libs));

@@ -4,10 +4,10 @@ import java.io.IOException;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
-public interface IConvertable<T> {
+public interface IConvertable<T, Context> {
 
     void validate() throws IllegalStateException;
 
-    T convert(JsonNodeFactory factory) throws IOException;
+    T convert(Context context, JsonNodeFactory factory) throws IOException;
 
 }

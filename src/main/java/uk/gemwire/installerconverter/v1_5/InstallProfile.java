@@ -8,11 +8,12 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.IConvertable;
 import uk.gemwire.installerconverter.util.JacksonUsed;
 import uk.gemwire.installerconverter.util.Pair;
 
-public final class InstallProfile implements IConvertable<Pair<ObjectNode, ObjectNode>> {
+public final class InstallProfile implements IConvertable<Pair<ObjectNode, ObjectNode>, Config> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstallProfile.class);
 
@@ -49,7 +50,7 @@ public final class InstallProfile implements IConvertable<Pair<ObjectNode, Objec
     }
 
     @Override
-    public Pair<ObjectNode, ObjectNode> convert(JsonNodeFactory factory) throws IOException {
-        return Pair.of(install.convert(factory), versionInfo.convert(factory));
+    public Pair<ObjectNode, ObjectNode> convert(Config config, JsonNodeFactory factory) throws IOException {
+        return Pair.of(install.convert(config, factory), versionInfo.convert(config, factory));
     }
 }
