@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
@@ -23,6 +24,10 @@ public final class LibraryInfo implements IConvertable<ObjectNode, Config> {
     private boolean clientreq = false;
     private boolean serverreq = false;
     private String url = "https://libraries.minecraft.net/";
+
+    private ObjectNode extract;
+    private ArrayNode rules;
+    private ObjectNode natives;
 
     @JacksonUsed
     public void setName(String name) {
@@ -49,6 +54,26 @@ public final class LibraryInfo implements IConvertable<ObjectNode, Config> {
         this.url = url.replaceFirst("^http:", "https:") + (url.endsWith("/") ? "" : "/");
     }
 
+    @JacksonUsed
+    public void setExtract(ObjectNode extract) {
+        this.extract = extract;
+    }
+
+    @JacksonUsed
+    public void setRules(ArrayNode rules) {
+        this.rules = rules;
+    }
+
+    @JacksonUsed
+    public void setNatives(ObjectNode natives) {
+        this.natives = natives;
+    }
+
+    @JacksonUsed("Used only in 1.6.x for scala")
+    public void setComment(String comment) {
+
+    }
+
     @Override
     public void validate() throws IllegalStateException {
         if (gav == null) throw new IllegalStateException("No Name for LibraryInfo");
@@ -73,6 +98,10 @@ public final class LibraryInfo implements IConvertable<ObjectNode, Config> {
         ObjectNode node = factory.objectNode();
         node.put("name", gav.asString());
         node.set("downloads", downloads);
+
+        if (natives != null) node.set("natives", natives);
+        if (rules != null) node.set("rules", rules);
+        if (extract != null) node.set("extract", extract);
 
         return node;
     }

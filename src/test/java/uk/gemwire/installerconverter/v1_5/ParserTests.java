@@ -16,7 +16,7 @@ public class ParserTests {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"1.7.10", "1.8.9", "1.9.4", "1.10.2", "1.11.2", "1.12.2"})
+    @ValueSource(strings = {"1.5.2", "1.6.4", "1.7.10", "1.8.9", "1.9.4", "1.10.2", "1.11.2", "1.12.2"})
     public void parseVersion(final String version) {
         assertDoesNotThrow(() -> parse(version).validate());
     }
