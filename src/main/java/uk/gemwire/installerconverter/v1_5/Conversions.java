@@ -35,4 +35,11 @@ public abstract class Conversions {
 
         return welcome;
     }
+
+    public static String convertProfile(String profileName) {
+        if (Objects.equals("Forge", profileName))
+            return "forge";
+
+        return profileName;
+    }
 }

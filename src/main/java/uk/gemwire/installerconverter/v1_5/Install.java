@@ -129,7 +129,7 @@ public final class Install implements IConvertable<ObjectNode, Config> {
 
         node.set("_comment_", Conversions.createCommentNode(factory));
         node.put("spec", 0);
-        node.put("profile", profileName);
+        node.put("profile", Conversions.convertProfile(profileName));
         node.put("version", Conversions.convertId(target));
         node.put("icon", config.icon()); //TODO: Conversion?
         node.put("json", "/version.json");
