@@ -12,6 +12,7 @@ import uk.gemwire.installerconverter.util.IO;
 public abstract class Maven {
 
     public static final String MOJANG = "https://libraries.minecraft.net/";
+    public static final String FORGE  = "https://files.minecraftforge.net/maven/";
 
     public static InputStream download(URL url) throws IOException {
         URLConnection connection = makeConnection(url);

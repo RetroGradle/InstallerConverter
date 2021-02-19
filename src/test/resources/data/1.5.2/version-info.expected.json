@@ -1,0 +1,84 @@
+{
+    "_comment_" : [
+        "Please do not automate the download and installation of Forge.",
+        "Our efforts are supported by ads from the download page.",
+        "If you MUST automate this, please consider supporting the project through https://www.patreon.com/LexManos/"
+    ],
+    "id" : "1.5.2-forge-7.8.1.738",
+    "time" : "2013-08-06T04:00:00-07:00",
+    "releaseTime" : "2013-04-25T08:45:00-07:00",
+    "type" : "release",
+    "mainClass" : "net.minecraft.launchwrapper.Launch",
+    "inheritsFrom" : "1.5.2",
+    "minecraftArguments" : "${auth_player_name} ${auth_session} --gameDir ${game_directory} --assetsDir ${game_assets} --tweakClass net.minecraftforge.legacy._1_5_2.LibraryFixerTweaker",
+    "minimumLauncherVersion" : 4,
+    "synced" : false,
+    "libraries" : [
+        {
+            "name" : "net.minecraftforge:forge:1.5.2-7.8.1.738",
+            "downloads" : {
+                "artifact" : {
+                    "path" : "net/minecraftforge/forge/1.5.2-7.8.1.738/forge-1.5.2-7.8.1.738.jar",
+                    "url" : "",
+                    "sha1" : "76223709288287a6a8d22ab16b43a6ab2a284a0d",
+                    "size" : 2033732
+                }
+            }
+        },
+        {
+            "name" : "org.scala-lang:scala-library:2.10.0-custom",
+            "downloads" : {
+                "artifact" : {
+                    "path" : "org/scala-lang/scala-library/2.10.0-custom/scala-library-2.10.0-custom.jar",
+                    "url" : "{TODO}",
+                    "sha1" : "458d046151ad179c85429ed7420ffb1eaf6ddf85",
+                    "size" : 7114640
+                }
+            }
+        },
+        {
+            "name" : "net.sourceforge.argo:argo:3.2-small",
+            "downloads" : {
+                "artifact" : {
+                    "path" : "net/sourceforge/argo/argo/3.2-small/argo-3.2-small.jar",
+                    "url" : "{TODO}",
+                    "sha1" : "58912ea2858d168c50781f956fa5b59f0f7c6b51",
+                    "size" : 91333
+                }
+            }
+        },
+        {
+            "name" : "org.bouncycastle:bcprov-jdk15on:1.47",
+            "downloads" : {
+                "artifact" : {
+                    "path" : "org/bouncycastle/bcprov-jdk15on/1.47/bcprov-jdk15on-1.47.jar",
+                    "url" : "https://libraries.minecraft.net/org/bouncycastle/bcprov-jdk15on/1.47/bcprov-jdk15on-1.47.jar",
+                    "sha1" : "b6f5d9926b0afbde9f4dbe3db88c5247be7794bb",
+                    "size" : 1997327
+                }
+            }
+        },
+        {
+            "name" : "com.google.guava:guava:14.0",
+            "downloads" : {
+                "artifact" : {
+                    "path" : "com/google/guava/guava/14.0/guava-14.0.jar",
+                    "url" : "https://libraries.minecraft.net/com/google/guava/guava/14.0/guava-14.0.jar",
+                    "sha1" : "67b7be4ee7ba48e4828a42d6d5069761186d4a53",
+                    "size" : 2189111
+                }
+            }
+        },
+        {
+            "name" : "net.minecraftforge_temp.legacy:legacyfixer:1.0",
+            "downloads" : {
+                "artifact" : {
+                    "path" : "net/minecraftforge_temp/legacy/legacyfixer/1.0/legacyfixer-1.0.jar",
+                    "url" : "{TODO}",
+                    "sha1" : "6f09db7f7a4d6241bbd9556556b03ea664ddf567",
+                    "size" : 6171
+                }
+            }
+        }
+    ]
+}
