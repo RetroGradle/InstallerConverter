@@ -1,12 +1,11 @@
 package uk.gemwire.installerconverter.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.util.exception.CachingException;
 
 public abstract class Caching {
@@ -26,7 +25,7 @@ public abstract class Caching {
     public static Path cached(Path cached, IOConsumer<Path> generator) throws CachingException {
         if (Files.exists(cached)) return cached;
 
-        LOGGER.debug("Caching: no cached copy of {}, running generator%n", cached);
+        LOGGER.debug("Caching: no cached copy of {}, running generator", cached);
 
         try {
             generator.accept(cached);

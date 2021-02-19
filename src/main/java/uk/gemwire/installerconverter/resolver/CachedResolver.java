@@ -10,14 +10,14 @@ import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gemwire.installerconverter.util.Pair;
 import uk.gemwire.installerconverter.util.maven.Artifact;
+import uk.gemwire.installerconverter.util.maven.ArtifactKey;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 
 public class CachedResolver implements IResolver {
     private static final Logger LOGGER = LoggerFactory.getLogger(CachedResolver.class);
 
-    private final Map<Pair<String, Artifact>, CachedArtifactInfo> cache = new HashMap<>();
+    private final Map<ArtifactKey, CachedArtifactInfo> cache = new HashMap<>();
     private final IResolver fallback;
 
     public CachedResolver(IResolver fallback) {
@@ -28,22 +28,23 @@ public class CachedResolver implements IResolver {
     @Nullable
     public CachedArtifactInfo resolve(String host, Artifact artifact) {
         LOGGER.trace("Retrieving artifact {} (of host {}) from cache", artifact.asStringWithClassifier(), host);
-        return cache.computeIfAbsent(Pair.of(host, artifact), pair -> {
-            LOGGER.trace("Artifact {} not found in cache, resolving from host {}", pair.right().asStringWithClassifier(), pair.left());
-            return fallback.resolve(pair.left(), pair.right());
+        return cache.computeIfAbsent(ArtifactKey.of(host, artifact), pair -> {
+            LOGGER.trace("Artifact {} not found in cache, resolving from host {}", pair.artifact().asStringWithClassifier(), pair.host());
+            return fallback.resolve(pair.host(), pair.artifact());
         });
     }
 
     @Override
     public void serialize(Writer writer) throws IOException {
-        for (Map.Entry<Pair<String, Artifact>, CachedArtifactInfo> entry : cache.entrySet()) {
-            Pair<String, Artifact> k = entry.getKey();
-            String host = k.left();
-            String artifact = k.right().asStringWithClassifier();
+        for (Map.Entry<ArtifactKey, CachedArtifactInfo> entry : cache.entrySet()) {
+            ArtifactKey k = entry.getKey();
+            String host = k.host();
+            String artifact = k.artifact().asStringWithClassifier();
 
             CachedArtifactInfo v = entry.getValue();
             String sha1 = v.sha1Hash();
             long expectedSize = v.expectedSize();
+            String url = v.url();
 
             writer
                 .append(host)
@@ -53,6 +54,8 @@ public class CachedResolver implements IResolver {
                 .append(sha1)
                 .append(",")
                 .append(String.valueOf(expectedSize))
+                .append(",")
+                .append(url)
                 .append("\r\n");
         }
 
@@ -67,14 +70,14 @@ public class CachedResolver implements IResolver {
             buffered
                 .lines()
                 .forEach(entry -> {
-                    String[] parts = entry.split(",", 4);
+                    String[] parts = entry.split(",");
 
-                    if (parts.length != 4) {
+                    if (parts.length != 5) {
                         LOGGER.error(String.format("Invalid cache line '%s'", entry));
                         return;
                     }
 
-                    cache.put(Pair.of(parts[0], Artifact.of(parts[1])), new CachedArtifactInfo(parts[2], Long.parseLong(parts[3])));
+                    cache.put(ArtifactKey.of(parts[0], Artifact.of(parts[1])), new CachedArtifactInfo(parts[2], Long.parseLong(parts[3]), parts[4]));
                 });
         }
     }

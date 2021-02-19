@@ -6,11 +6,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
-import com.google.common.base.Charsets;
 import uk.gemwire.installerconverter.util.Hashing;
 import uk.gemwire.installerconverter.util.IO;
 
 public abstract class Maven {
+
+    public static final String MOJANG = "https://libraries.minecraft.net/";
 
     public static InputStream download(URL url) throws IOException {
         URLConnection connection = makeConnection(url);
@@ -21,9 +22,13 @@ public abstract class Maven {
         return connection.getInputStream();
     }
 
-    public static CachedArtifactInfo calculateSHA1andSize(URL url) throws IOException {
+    public static CachedArtifactInfo calculateSHA1andSize(String url) throws IOException {
+        return calculateSHA1andSize(new URL(url), url);
+    }
+
+    public static CachedArtifactInfo calculateSHA1andSize(URL url, String declaredURL) throws IOException {
         try (InputStream stream = download(url)) {
-            return Hashing.calculateSHA1andSize(stream);
+            return Hashing.calculateSHA1andSize(stream, declaredURL);
         }
     }
 

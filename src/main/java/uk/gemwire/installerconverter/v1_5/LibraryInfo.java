@@ -4,19 +4,18 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
-import javax.annotation.Nullable;
-
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.Config;
-import uk.gemwire.installerconverter.util.IConvertable;
+import uk.gemwire.installerconverter.legacy.LibraryTransformers;
 import uk.gemwire.installerconverter.util.JacksonUsed;
 import uk.gemwire.installerconverter.util.Pair;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
+import uk.gemwire.installerconverter.util.maven.Maven;
 
 public final class LibraryInfo implements IConvertable<ObjectNode, Pair<Config, String>> {
 
@@ -26,7 +25,7 @@ public final class LibraryInfo implements IConvertable<ObjectNode, Pair<Config, 
     private List<String> checksums;
     private boolean clientreq = false;
     private boolean serverreq = false;
-    private String url = "https://libraries.minecraft.net/";
+    private String url = Maven.MOJANG;
 
     private ObjectNode extract;
     private ArrayNode rules;
@@ -77,8 +76,16 @@ public final class LibraryInfo implements IConvertable<ObjectNode, Pair<Config, 
 
     }
 
+    public String getUrl() {
+        return url;
+    }
+
     public Artifact getGav() {
         return gav;
+    }
+
+    public void setGav(Artifact gav) {
+        this.gav = gav;
     }
 
     @Override
@@ -122,16 +129,16 @@ public final class LibraryInfo implements IConvertable<ObjectNode, Pair<Config, 
         String path = gav.asPath();
         String finalURL = url + path;
 
-        LOGGER.debug("Resolving: " + (isForge ? config.baseMaven() + Artifact.of(gav.asString() + ":universal").asPath() : finalURL));
+        LOGGER.debug("Resolving: " + (isForge ? config.baseMaven() + Artifact.of(gav.asString()).asPath() : finalURL));
 
         ObjectNode artifact = factory.objectNode();
         artifact.put("path", path);
-        artifact.put("url", isForge ? "" : finalURL);
-        //TODO: The forge gav should be grabbed from the inMemoryFs if possible
-        CachedArtifactInfo data = config.resolver().resolve(isForge ? config.baseMaven() : url, isForge ? Artifact.of(gav.asString()) : gav);
+
+        CachedArtifactInfo data = config.resolver().resolve(url, isForge ? Artifact.of(gav.asString()) : gav);
 
         if (data == null) throw new IOException(String.format("Couldn't get Sha1 or Size for '%s' from '%s'", gav.asStringWithClassifier(), url));
 
+        artifact.put("url", data.url());
         artifact.put("sha1", data.sha1Hash());
         artifact.put("size", data.expectedSize());
 
@@ -142,6 +149,10 @@ public final class LibraryInfo implements IConvertable<ObjectNode, Pair<Config, 
         if (!Objects.equals(gav.artifact(), "minecraftforge")) return;
 
         gav = new Artifact(gav.group(), "forge", minecraft + "-" + gav.version(), null);
+    }
+
+    public void standardise(String minecraft) {
+        LibraryTransformers.execute(minecraft, this);
     }
 
 }

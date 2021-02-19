@@ -1,7 +1,5 @@
 package uk.gemwire.installerconverter.util;
 
-import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -9,13 +7,15 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
+
 public abstract class Hashing {
 
-    public static CachedArtifactInfo calculateSHA1andSize(InputStream stream) throws IOException {
+    public static CachedArtifactInfo calculateSHA1andSize(InputStream stream, String declaredUrl) throws IOException {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-1");
             long size = IO.exhaust(new DigestInputStream(stream, digest));
-            return new CachedArtifactInfo(asSha1Hash(digest), size);
+            return CachedArtifactInfo.of(asSha1Hash(digest), size, declaredUrl);
         } catch (NoSuchAlgorithmException exception) {
             throw new IOException(exception);
         }

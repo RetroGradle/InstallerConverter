@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import uk.gemwire.installerconverter.Config;
-import uk.gemwire.installerconverter.util.IConvertable;
 import uk.gemwire.installerconverter.util.JacksonUsed;
 import uk.gemwire.installerconverter.util.Pair;
 import uk.gemwire.installerconverter.util.VersionManifest;
@@ -58,8 +57,10 @@ public final class VersionInfo implements IConvertable<ObjectNode, Pair<Config, 
 
         // Legacy Forge Conversion (1.6.x / 1.5.x)
         if (libraries.stream().map(LibraryInfo::getGav).map(Artifact::artifact).anyMatch(artifact -> Objects.equals("minecraftforge", artifact))) {
-            List<String> inheritLibraries = VersionManifest.provideLibraries(context.right());
+            /* Standardised Legacy Libraries */
+            libraries.forEach(library -> library.standardise(context.right()));
 
+            List<String> inheritLibraries = VersionManifest.provideLibraries(context.right());
             libraries.removeIf(library -> inheritLibraries.contains(library.getGav().asStringWithClassifier()));
 
             if (!data.containsKey("inheritsFrom")) data.put("inheritsFrom", factory.textNode(context.right()));

@@ -7,15 +7,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gemwire.installerconverter.util.manifest.VersionInfo;
 import uk.gemwire.installerconverter.util.maven.Maven;
 
 public abstract class VersionManifest {
@@ -23,10 +28,74 @@ public abstract class VersionManifest {
     private static final Logger LOGGER = LoggerFactory.getLogger(Installers.class);
     private static final String VERSION_MANIFEST = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
 
+    //==================================================================================================================
+
+    public static void main(String[] args) throws Exception {
+        ObjectNode manifest = Jackson.read(Files.readString(cachedVersionManifest()));
+
+        Predicate<VersionInfo> RELEASES  = version -> Objects.equals(version.type(), "release");
+        Predicate<VersionInfo> OLD_BETA  = version -> Objects.equals(version.type(), "old_beta");
+        Predicate<VersionInfo> OLD_ALPHA = version -> Objects.equals(version.type(), "old_alpha");
+
+        //System.out.println(getVersionInfos(manifest.withArray("versions"))
+        //    .stream()
+        //    .filter(OLD_BETA)
+        //    .map(VersionInfo::id).count());
+        //if (true) return;
+
+        List<String> versions =
+            getVersionInfos(manifest.withArray("versions"))
+                .stream()
+                .filter(RELEASES.or(OLD_BETA).or(OLD_ALPHA))
+                .map(VersionInfo::id)
+                .sorted()
+                .collect(Collectors.toList());
+
+        listAllLibraries(versions);
+
+        //listUsages(versions, "argo:argo:2.25_fixed");
+        //listUsages(versions, "org.bouncycastle:bcprov-jdk15on:1.47");
+    }
+
+    public static void listAllLibraries(List<String> versions) throws IOException {
+        Set<String> allLibraries = new HashSet<>();
+
+        for (String version : versions) {
+            allLibraries.addAll(provideLibraries(Jackson.read(Files.readString(VersionManifest.provide(version)))));
+        }
+
+        allLibraries.stream().sorted().forEach(System.out::println);
+    }
+
+    public static void listUsages(List<String> versions, String artifact) throws IOException {
+        for (String version : versions) {
+            List<String> libraries = provideLibraries(Jackson.read(Files.readString(VersionManifest.provide(version))));
+
+            if (libraries.contains(artifact))
+                System.out.println("Version " + version + " contains " + artifact);
+        }
+    }
+
+    private static Path cachedVersionManifest() {
+        return Caching.cached("version-manifest.json", (destination) -> {
+            LOGGER.info("Downloading version-manifest {}...", destination);
+            try (InputStream in = Maven.download(new URL(VERSION_MANIFEST))) {
+                Files.copy(in, destination, StandardCopyOption.REPLACE_EXISTING);
+            }
+            LOGGER.info("Downloaded version-manifest!");
+        });
+    }
+
+    //==================================================================================================================
+
     public static List<String> provideLibraries(String version) throws IOException {
+        ObjectNode node = Jackson.read(Files.readString(provide(version)));
+        return provideLibraries(node);
+    }
+
+    public static List<String> provideLibraries(ObjectNode node) {
         List<String> results = new ArrayList<>();
 
-        ObjectNode node = Jackson.read(Files.readString(provide(version)));
         ArrayNode libraries = node.withArray("libraries");
 
         libraries.forEach(element -> {
@@ -40,10 +109,12 @@ public abstract class VersionManifest {
     }
 
     public static Path provide(String version) {
-        return Caching.cached("version-info-base-{version}.json".replace("{version}", version), (path) -> download(version, path));
+        return Caching.cached("version-info-base/{version}.json".replace("{version}", version), (path) -> download(version, path));
     }
 
     private static void download(String version, Path destination) throws IOException {
+        Files.createDirectories(destination.getParent());
+
         LOGGER.info("Downloading version-manifest {} to {}...", version, destination);
         try (InputStream in = Maven.download(new URL(getVersionUrl(version)))) {
             Files.copy(in, destination, StandardCopyOption.REPLACE_EXISTING);
@@ -65,24 +136,19 @@ public abstract class VersionManifest {
     }
 
     private static Optional<String> findVersion(ObjectNode manifest, String version) {
-        List<Pair<String, String>> versions = getVersions(manifest.withArray("versions"));
-        Predicate<Pair<String, String>> filter = filterById(version);
-        return versions.stream().filter(filter).findFirst().map(Pair::right);
+        List<VersionInfo> versions = getVersionInfos(manifest.withArray("versions"));
+        Predicate<VersionInfo> filter = filterById(version);
+        return versions.stream().filter(filter).findFirst().map(VersionInfo::url);
     }
 
-    private static List<Pair<String, String>> getVersions(ArrayNode array) {
-        List<Pair<String, String>> data = new ArrayList<>();
-        array.forEach(element -> {
-            if (!element.isObject()) throw new IllegalStateException("Element is not an Object");
-
-            ObjectNode version = (ObjectNode) element;
-            data.add(Pair.of(version.get("id").asText(), version.get("url").asText()));
-        });
+    private static List<VersionInfo> getVersionInfos(ArrayNode array) {
+        List<VersionInfo> data = new ArrayList<>();
+        array.forEach(element -> data.add(Jackson.JSON.convertValue(element, VersionInfo.class)));
         return data;
     }
 
-    private static Predicate<Pair<String, String>> filterById(String version) {
-        return (pair) -> pair.left().toLowerCase(Locale.ROOT).equals(version.toLowerCase(Locale.ROOT));
+    private static Predicate<VersionInfo> filterById(String version) {
+        return (pair) -> pair.id().toLowerCase(Locale.ROOT).equals(version.toLowerCase(Locale.ROOT));
     }
 
 }

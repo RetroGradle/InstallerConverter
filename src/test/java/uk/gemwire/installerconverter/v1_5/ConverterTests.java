@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import uk.gemwire.installerconverter.Config;
-import uk.gemwire.installerconverter.util.IConvertable;
 import uk.gemwire.installerconverter.util.Jackson;
 import uk.gemwire.installerconverter.util.Pair;
 

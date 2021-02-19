@@ -19,14 +19,14 @@ public class Main {
         config.setup();
 
         //debugLibraryInfo(config, "http://files.minecraftforge.net/maven/", "org.scala-lang:scala-library:2.10.2");
-        //debugLibraryInfo(config, "http://files.minecraftforge.net/maven/", "org.scala-lang:scala-compiler:2.10.2");
-        //debugLibraryInfo(config, "lzma:lzma:0.0.1");
+        //debugLibraryInfo(config, "org.bouncycastle:bcprov-jdk15on:1.47");
+        //if (true) return;
 
         try {
             long startTime = System.nanoTime();
 
             InstallerConverter.convert(config, "1.5.2-7.8.1.738");
-            InstallerConverter.convert(config, "1.6.4-9.11.1.965");
+            //InstallerConverter.convert(config, "1.6.4-9.11.1.965");
             //InstallerConverter.convert(config, "1.12.2-14.23.5.2847");
 
             long endTime = System.nanoTime();

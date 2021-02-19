@@ -1,4 +1,4 @@
-package uk.gemwire.installerconverter.util;
+package uk.gemwire.installerconverter.v1_5;
 
 import java.io.IOException;
 
