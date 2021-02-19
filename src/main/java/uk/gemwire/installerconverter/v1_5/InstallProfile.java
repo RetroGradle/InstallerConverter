@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.JacksonUsed;
-import uk.gemwire.installerconverter.util.Pair;
+import uk.gemwire.installerconverter.util.common.Pair;
 
 public final class InstallProfile implements IConvertable<Pair<ObjectNode, ObjectNode>, Config> {
 

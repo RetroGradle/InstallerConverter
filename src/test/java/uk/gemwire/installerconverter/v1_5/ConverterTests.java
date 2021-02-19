@@ -12,7 +12,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.Jackson;
-import uk.gemwire.installerconverter.util.Pair;
+import uk.gemwire.installerconverter.util.common.Pair;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;

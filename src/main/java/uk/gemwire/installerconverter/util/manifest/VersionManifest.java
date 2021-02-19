@@ -1,4 +1,4 @@
-package uk.gemwire.installerconverter.util;
+package uk.gemwire.installerconverter.util.manifest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,7 +20,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gemwire.installerconverter.util.manifest.VersionInfo;
+import uk.gemwire.installerconverter.util.Caching;
+import uk.gemwire.installerconverter.util.IO;
+import uk.gemwire.installerconverter.util.Installers;
+import uk.gemwire.installerconverter.util.Jackson;
+import uk.gemwire.installerconverter.util.common.Lazy;
 import uk.gemwire.installerconverter.util.maven.Maven;
 
 public abstract class VersionManifest {
@@ -88,6 +92,8 @@ public abstract class VersionManifest {
 
     //==================================================================================================================
 
+    private static final Lazy<String> versionManifest = Lazy.of(VersionManifest::getVersionManifest);
+
     public static List<String> provideLibraries(String version) throws IOException {
         ObjectNode node = Jackson.read(Files.readString(provide(version)));
         return provideLibraries(node);
@@ -123,13 +129,13 @@ public abstract class VersionManifest {
     }
 
     private static String getVersionUrl(String version) throws IOException {
-        ObjectNode manifest = Jackson.read(getVersionManifest());
+        ObjectNode manifest = Jackson.read(versionManifest.get());
 
         return findVersion(manifest, version).orElseThrow(() -> new IllegalStateException("Could not find " + version + " in Minecraft Version manifest"));
     }
 
-    //TODO: CACHE PER RUN
     private static String getVersionManifest() throws IOException {
+        LOGGER.info("Downloading version-manifest-all");
         try (InputStream in = Maven.download(new URL(VERSION_MANIFEST))) {
             return IO.toString(in);
         }

@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.util.Installers;
 import uk.gemwire.installerconverter.util.Jackson;
-import uk.gemwire.installerconverter.util.Pair;
+import uk.gemwire.installerconverter.util.common.Pair;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.v1_5.InstallProfile;
 

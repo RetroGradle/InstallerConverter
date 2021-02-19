@@ -6,6 +6,7 @@ import java.nio.file.Path;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gemwire.installerconverter.util.common.IOConsumer;
 import uk.gemwire.installerconverter.util.exception.CachingException;
 
 public abstract class Caching {

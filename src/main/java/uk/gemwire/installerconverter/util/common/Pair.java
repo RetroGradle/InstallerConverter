@@ -1,4 +1,4 @@
-package uk.gemwire.installerconverter.util;
+package uk.gemwire.installerconverter.util.common;
 
 public record Pair<L, R>(L left, R right) {
 

@@ -3,7 +3,7 @@ package uk.gemwire.installerconverter;
 import java.io.IOException;
 
 import uk.gemwire.installerconverter.util.Jackson;
-import uk.gemwire.installerconverter.util.Pair;
+import uk.gemwire.installerconverter.util.common.Pair;
 import uk.gemwire.installerconverter.v1_5.LibraryInfo;
 
 /**

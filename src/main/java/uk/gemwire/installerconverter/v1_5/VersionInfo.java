@@ -13,8 +13,8 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.JacksonUsed;
-import uk.gemwire.installerconverter.util.Pair;
-import uk.gemwire.installerconverter.util.VersionManifest;
+import uk.gemwire.installerconverter.util.common.Pair;
+import uk.gemwire.installerconverter.util.manifest.VersionManifest;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 
 /**
