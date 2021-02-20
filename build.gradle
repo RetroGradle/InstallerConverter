@@ -9,9 +9,14 @@ version = '0.1'
 repositories {
     mavenCentral()
     jcenter()
+    flatDir {
+        dirs(".cache/local/uk/gemwire/RetroInstallerTools/0.1")
+    }
 }
 
 dependencies {
+    implementation group: 'local', name: 'RetroInstallerTools', version: '0.1', classifier: 'fatjar'
+
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.12.1'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.12.1'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.1'

@@ -10,7 +10,7 @@ import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 public abstract class AbstractResolver implements IResolver {
 
     @Nullable
-    private final IResolver fallback;
+    protected final IResolver fallback;
     private final Logger logger;
 
     protected AbstractResolver(@Nullable IResolver fallback, Logger logger) {

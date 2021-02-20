@@ -12,7 +12,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.Jackson;
-import uk.gemwire.installerconverter.util.common.Pair;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 import uk.gemwire.installerconverter.util.maven.Maven;
@@ -25,13 +24,13 @@ public class ConverterTests {
 
     @Test
     void convertInstall() throws IOException {
-        compareConversion("1.12.2", "install-profile", Install.class, createConfig());
+        compareConversion("1.12.2", "install-profile", Install.class, CommonContext.of(createConfig(), "1.12.2"));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"1.5.2", "1.6.4", "1.12.2"})
     void convertVersionInfo(final String version) throws IOException {
-        compareConversion(version, "version-info", VersionInfo.class, Pair.of(createConfig(), version));
+        compareConversion(version, "version-info", VersionInfo.class, CommonContext.of(createConfig(), version));
     }
 
     Config createConfig() throws IOException {

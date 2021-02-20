@@ -11,6 +11,9 @@ import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.JacksonUsed;
 import uk.gemwire.installerconverter.util.common.Pair;
+import uk.gemwire.installerconverter.util.maven.Artifact;
+import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
+import uk.gemwire.installerconverter.util.maven.Maven;
 
 public final class InstallProfile implements IConvertable<Pair<ObjectNode, ObjectNode>, Config> {
 
@@ -50,6 +53,14 @@ public final class InstallProfile implements IConvertable<Pair<ObjectNode, Objec
 
     @Override
     public Pair<ObjectNode, ObjectNode> convert(Config config, JsonNodeFactory factory) throws IOException {
-        return Pair.of(install.convert(config, factory), versionInfo.convert(Pair.of(config, install.getMinecraft()), factory));
+        String minecraft = install.getMinecraft();
+        CachedArtifactInfo client = null;
+        CachedArtifactInfo server = null;
+        if (minecraft.startsWith("1.5")) {
+            client = config.resolver().resolve(Maven.FAKE, Artifact.of("net.minecraft:client:{version}:stripped".replace("{version}", minecraft))); // CachedArtifactInfo.of("90f9a7e7e651990b2dc81bfeb10f2b01f6956165", 0, "");
+            server = config.resolver().resolve(Maven.FAKE, Artifact.of("net.minecraft:server:{version}:stripped".replace("{version}", minecraft)));
+        }
+
+        return Pair.of(install.convert(CommonContext.of(config, minecraft, client, server), factory), versionInfo.convert(CommonContext.of(config, minecraft, client, server), factory));
     }
 }

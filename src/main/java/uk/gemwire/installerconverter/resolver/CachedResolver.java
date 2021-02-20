@@ -55,7 +55,7 @@ public class CachedResolver implements IResolver {
                 .append(",")
                 .append(String.valueOf(expectedSize))
                 .append(",")
-                .append(url)
+                .append(url.isEmpty() ? " " : url)
                 .append("\r\n");
         }
 
@@ -73,11 +73,11 @@ public class CachedResolver implements IResolver {
                     String[] parts = entry.split(",");
 
                     if (parts.length != 5) {
-                        LOGGER.error(String.format("Invalid cache line '%s'", entry));
+                        LOGGER.error(String.format("Invalid cache line (Length '%s' expected 5) '%s'", parts.length, entry));
                         return;
                     }
 
-                    cache.put(ArtifactKey.of(parts[0], Artifact.of(parts[1])), new CachedArtifactInfo(parts[2], Long.parseLong(parts[3]), parts[4]));
+                    cache.put(ArtifactKey.of(parts[0], Artifact.of(parts[1])), new CachedArtifactInfo(parts[2], Long.parseLong(parts[3]), parts[4].trim()));
                 });
         }
     }

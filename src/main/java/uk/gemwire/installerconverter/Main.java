@@ -3,7 +3,7 @@ package uk.gemwire.installerconverter;
 import java.io.IOException;
 
 import uk.gemwire.installerconverter.util.Jackson;
-import uk.gemwire.installerconverter.util.common.Pair;
+import uk.gemwire.installerconverter.v1_5.CommonContext;
 import uk.gemwire.installerconverter.v1_5.LibraryInfo;
 
 /**
@@ -17,8 +17,7 @@ public class Main {
             .withCachingResolver();
 
         config.setup();
-
-        //debugLibraryInfo(config, "http://files.minecraftforge.net/maven/", "org.scala-lang:scala-library:2.10.2");
+        //debugLibraryInfo(config, "http://files.minecraftforge.net/maven/", "net.minecraftforge:forge:1.5.2-7.8.1.738:client");
         //debugLibraryInfo(config, "org.bouncycastle:bcprov-jdk15on:1.47");
         //if (true) return;
 
@@ -47,6 +46,6 @@ public class Main {
         if (host != null) info.setUrl(host);
         info.setName(name);
         info.validate();
-        System.out.println(Jackson.write(info.convert(Pair.of(config, null), Jackson.factory())));
+        System.out.println(Jackson.write(info.convert(CommonContext.of(config, null), Jackson.factory())));
     }
 }

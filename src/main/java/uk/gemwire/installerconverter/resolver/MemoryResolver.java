@@ -2,6 +2,8 @@ package uk.gemwire.installerconverter.resolver;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -45,4 +47,13 @@ public class MemoryResolver extends AbstractResolver {
         }
     }
 
+    @Override
+    public void serialize(Writer writer) throws IOException {
+        if (fallback != null) fallback.serialize(writer);
+    }
+
+    @Override
+    public void deserialize(Reader reader) throws IOException {
+        if (fallback != null) fallback.deserialize(reader);
+    }
 }

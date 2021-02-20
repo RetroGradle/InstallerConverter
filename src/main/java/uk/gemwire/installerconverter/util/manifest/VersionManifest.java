@@ -94,6 +94,15 @@ public abstract class VersionManifest {
 
     private static final Lazy<String> versionManifest = Lazy.of(VersionManifest::getVersionManifest);
 
+    public static String provideDownload(String version, String side) throws IOException {
+        try {
+            ObjectNode node = Jackson.read(Files.readString(provide(version)));
+            return node.with("downloads").with(side).get("url").asText();
+        } catch (NullPointerException e) {
+            throw new IOException(e);
+        }
+    }
+
     public static List<String> provideLibraries(String version) throws IOException {
         ObjectNode node = Jackson.read(Files.readString(provide(version)));
         return provideLibraries(node);

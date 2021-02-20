@@ -1,16 +1,19 @@
 package uk.gemwire.installerconverter.v1_5;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.JacksonUsed;
-import uk.gemwire.installerconverter.util.common.Pair;
+import uk.gemwire.installerconverter.util.maven.Artifact;
+import uk.gemwire.installerconverter.util.maven.Maven;
 
-public final class Install implements IConvertable<ObjectNode, Config> {
+public final class Install implements IConvertable<ObjectNode, CommonContext> {
 
     private String profileName;
     private String target;
@@ -27,6 +30,10 @@ public final class Install implements IConvertable<ObjectNode, Config> {
     private boolean hideClient = false;
     private boolean hideServer = false;
     private boolean hideExtract = false;
+
+    private ObjectNode data;
+    private ArrayNode processor;
+    private ArrayNode libraries;
 
     @JacksonUsed
     public void setProfileName(String profileName) {
@@ -121,8 +128,10 @@ public final class Install implements IConvertable<ObjectNode, Config> {
     }
 
     @Override
-    public ObjectNode convert(Config config, JsonNodeFactory factory) throws IOException {
+    public ObjectNode convert(CommonContext context, JsonNodeFactory factory) throws IOException {
         ObjectNode node = factory.objectNode();
+
+        version = Conversions.convertId(target);
 
         /* Skip MirrorList if it's forges - TODO: Check this is correct */
         if (Objects.equals(mirrorList, "http://files.minecraftforge.net/mirror-brand.list")) mirrorList = null;
@@ -130,8 +139,8 @@ public final class Install implements IConvertable<ObjectNode, Config> {
         node.set("_comment_", Conversions.createCommentNode(factory));
         node.put("spec", 0);
         node.put("profile", Conversions.convertProfile(profileName));
-        node.put("version", Conversions.convertId(target));
-        node.put("icon", config.icon()); //TODO: Conversion?
+        node.put("version", version);
+        node.put("icon", context.config().icon()); //TODO: Conversion?
         node.put("json", "/version.json");
         node.put("path", path);
         node.put("logo", logo);
@@ -152,14 +161,56 @@ public final class Install implements IConvertable<ObjectNode, Config> {
         if (hideExtract)
             node.put("hideExtract", true);
 
-        node.set("data", factory.objectNode());
-        node.set("processors", factory.arrayNode());
+        if (data == null) data = factory.objectNode();
+        if (processor == null) processor = factory.arrayNode();
+        if (libraries == null) libraries = factory.arrayNode();
+
+        if (minecraft.startsWith("1.5.")) {
+            /*
+             * Can be in the following formats:
+             * [value] - An absolute path to an artifact located in the target maven style repo.
+             * 'value' - A string literal, remove the 's and use this value
+             * value - A file in the installer package, to be extracted to a temp folder, and then have the absolute path in replacements.
+             */
+            data.set("STRIPPED", factory.objectNode()
+                .put("client", "[net.minecraft:client:" + minecraft + ":stripped]")
+                .put("server", "[net.minecraft:server:" + minecraft + ":stripped]")
+            );
+            data.set("STRIPPED_SHA1", factory.objectNode()
+                .put("client", "'{SHA1}'".replace("{SHA1}", context.client().sha1Hash()))
+                .put("server", "'{SHA1}'".replace("{SHA1}", context.server().sha1Hash()))
+            );
+
+            processor.add(Processor.of(
+                Artifact.of("uk.gemwire:RetroInstallerTools:0.1:fatjar"),
+                new Artifact[0],
+                new String[] { "--task=STRIP_SIGNATURES", "--input", "{MINECRAFT_JAR}", "--output", "{STRIPPED}" },
+                Map.of("{STRIPPED}", "{STRIPPED_SHA1}"),
+                List.of()
+            ).toNode(factory));
+
+            processor.add(Processor.of(
+                Artifact.of("uk.gemwire:RetroInstallerTools:0.1:fatjar"),
+                new Artifact[0],
+                new String[] { "--task=COPY_AS_CLIENT_JAR", "--input", "{STRIPPED}", "--reference", "{MINECRAFT_JAR}", "--version", version },
+                Map.of(),
+                List.of("client")
+            ).toNode(factory));
+
+            LibraryInfo tools = new LibraryInfo();
+            tools.setName("uk.gemwire:RetroInstallerTools:0.1:fatjar");
+            tools.setUrl(Maven.FORGE);
+            libraries.add(tools.convert(context, factory));
+        }
+
+        node.set("data", data);
+        node.set("processors", processor);
 
         // Add the forge library. (TODO: Check if path is the correct value for all cases we care about)
         LibraryInfo forge = new LibraryInfo();
         forge.setName(path);
-        forge.setUrl(config.baseMaven());
-        node.set("libraries", factory.arrayNode().add(forge.convert(Pair.of(config, minecraft), factory)));
+        forge.setUrl(Maven.FORGE);
+        node.set("libraries", libraries.add(forge.convert(context, factory)));
 
         return node;
     }

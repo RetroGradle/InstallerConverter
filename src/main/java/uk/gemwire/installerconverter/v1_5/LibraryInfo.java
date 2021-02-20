@@ -12,12 +12,11 @@ import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.legacy.LibraryTransformers;
 import uk.gemwire.installerconverter.util.JacksonUsed;
-import uk.gemwire.installerconverter.util.common.Pair;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 import uk.gemwire.installerconverter.util.maven.Maven;
 
-public final class LibraryInfo implements IConvertable<ObjectNode, Pair<Config, String>> {
+public final class LibraryInfo implements IConvertable<ObjectNode, CommonContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LibraryInfo.class);
 
@@ -94,9 +93,9 @@ public final class LibraryInfo implements IConvertable<ObjectNode, Pair<Config, 
     }
 
     @Override
-    public ObjectNode convert(Pair<Config, String> context, JsonNodeFactory factory) throws IOException {
+    public ObjectNode convert(CommonContext context, JsonNodeFactory factory) throws IOException {
         // Legacy Forge Conversion (1.6.x / 1.5.x)
-        upgradeLegacyForge(context.right());
+        upgradeLegacyForge(context.minecraft());
 
         //TODO: Handle clientreq / serverreq - What do we need to do with them
 
@@ -105,11 +104,11 @@ public final class LibraryInfo implements IConvertable<ObjectNode, Pair<Config, 
         //TODO: Testing
         if (gav.classifier() != null) {
             ObjectNode classifiers = factory.objectNode();
-            classifiers.set(gav.classifier(), convertArtifact(context.left(), factory));
+            classifiers.set(gav.classifier(), convertArtifact(context.config(), factory));
 
             downloads.set("classifiers", classifiers);
         } else {
-            downloads.set("artifact", convertArtifact(context.left(), factory));
+            downloads.set("artifact", convertArtifact(context.config(), factory));
         }
 
         ObjectNode node = factory.objectNode();
@@ -124,17 +123,15 @@ public final class LibraryInfo implements IConvertable<ObjectNode, Pair<Config, 
     }
 
     private ObjectNode convertArtifact(Config config, JsonNodeFactory factory) throws IOException {
-        boolean isForge = Objects.equals(gav.artifact(), "forge");
-
         String path = gav.asPath();
         String finalURL = url + path;
 
-        LOGGER.debug("Resolving: " + (isForge ? config.baseMaven() + Artifact.of(gav.asString()).asPath() : finalURL));
+        LOGGER.debug("Resolving: " + finalURL);
 
         ObjectNode artifact = factory.objectNode();
         artifact.put("path", path);
 
-        CachedArtifactInfo data = config.resolver().resolve(url, isForge ? Artifact.of(gav.asString()) : gav);
+        CachedArtifactInfo data = config.resolver().resolve(url, gav);
 
         if (data == null) throw new IOException(String.format("Couldn't get Sha1 or Size for '%s' from '%s'", gav.asStringWithClassifier(), url));
 
