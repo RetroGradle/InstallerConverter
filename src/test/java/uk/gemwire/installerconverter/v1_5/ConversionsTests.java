@@ -7,7 +7,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ConversionsTest {
+public class ConversionsTests {
 
     @ParameterizedTest
     @ValueSource(strings = {"a-forgeextra-b", "a-Forgeextra-b-a", "a-Forgeb-a", "a-Forgeb"})
