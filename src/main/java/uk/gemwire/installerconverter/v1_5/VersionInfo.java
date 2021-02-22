@@ -86,8 +86,8 @@ public final class VersionInfo implements IConvertable<ObjectNode, CommonContext
 
         if (context.client() != null || context.server() != null) {
             ObjectNode downloads = factory.objectNode();
-            if (context.client() != null) addDownload(factory, downloads, context.client(), context.minecraft(), "client");
-            if (context.server() != null) addDownload(factory, downloads, context.server(), context.minecraft(), "server");
+            if (context.client() != null) addDownload(factory, downloads, context.client(), "client");
+            if (context.server() != null) addDownload(factory, downloads, context.server(), "server");
             data.put("downloads", downloads);
         }
 
@@ -106,9 +106,8 @@ public final class VersionInfo implements IConvertable<ObjectNode, CommonContext
         return node;
     }
 
-    private void addDownload(JsonNodeFactory factory, ObjectNode downloads, CachedArtifactInfo info, String minecraft, String type) {
+    private void addDownload(JsonNodeFactory factory, ObjectNode downloads, CachedArtifactInfo info, String type) {
         ObjectNode artifact = factory.objectNode();
-        artifact.put("path", "net/minecraft/{type}/{version}/{type}-{version}-stripped.jar".replace("{type}", type).replace("{version}", minecraft));
         artifact.put("url", info.url());
         artifact.put("sha1", info.sha1Hash());
         artifact.put("size", info.expectedSize());
