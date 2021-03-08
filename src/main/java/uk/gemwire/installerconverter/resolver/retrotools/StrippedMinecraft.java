@@ -1,4 +1,4 @@
-package uk.gemwire.installerconverter.util;
+package uk.gemwire.installerconverter.resolver.retrotools;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,11 +9,15 @@ import java.nio.file.Path;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
+import uk.gemwire.installerconverter.util.Caching;
+import uk.gemwire.installerconverter.util.Hashing;
 import uk.gemwire.installerconverter.util.manifest.VersionManifest;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 import uk.gemwire.installerconverter.util.maven.Maven;
+import uk.gemwire.installertools.processor.StripSignaturesProcessor;
 import uk.gemwire.installertools.processor.ZipProcessor;
+import uk.gemwire.installertools.processor.manifest.StripManifestSignatures;
 
 public class StrippedMinecraft {
 
@@ -38,8 +42,9 @@ public class StrippedMinecraft {
 
         String download = VersionManifest.provideDownload(version, side);
 
+        //TODO: Create Interface on StripSignatures
         try (InputStream input = Maven.download(new URL(download)); OutputStream output = Files.newOutputStream(destination)) {
-            ZipProcessor.process(input, output);
+            ZipProcessor.process(input, output, new StripManifestSignatures(), new StripSignaturesProcessor());
         }
     }
 

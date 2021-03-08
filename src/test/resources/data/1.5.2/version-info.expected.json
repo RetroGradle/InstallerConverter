@@ -30,7 +30,7 @@
             "downloads" : {
                 "artifact" : {
                     "path" : "org/scala-lang/scala-library/2.10.0-custom/scala-library-2.10.0-custom.jar",
-                    "url" : "{TODO}",
+                    "url" : "https://ateranimavis.github.io/maven/org/scala-lang/scala-library/2.10.0-custom/scala-library-2.10.0-custom.jar",
                     "sha1" : "458d046151ad179c85429ed7420ffb1eaf6ddf85",
                     "size" : 7114640
                 }
@@ -41,9 +41,20 @@
             "downloads" : {
                 "artifact" : {
                     "path" : "net/sourceforge/argo/argo/3.2-small/argo-3.2-small.jar",
-                    "url" : "{TODO}",
+                    "url" : "https://files.minecraftforge.net/fmllibs/argo-small-3.2.jar",
                     "sha1" : "58912ea2858d168c50781f956fa5b59f0f7c6b51",
                     "size" : 91333
+                }
+            }
+        },
+        {
+            "name" : "org.ow2.asm:asm-all:4.1",
+            "downloads" : {
+                "artifact" : {
+                    "path" : "org/ow2/asm/asm-all/4.1/asm-all-4.1.jar",
+                    "url" : "https://libraries.minecraft.net/org/ow2/asm/asm-all/4.1/asm-all-4.1.jar",
+                    "sha1" : "054986e962b88d8660ae4566475658469595ef58",
+                    "size" : 214592
                 }
             }
         },
@@ -74,7 +85,7 @@
             "downloads" : {
                 "artifact" : {
                     "path" : "net/minecraftforge_temp/legacy/legacyfixer/1.0/legacyfixer-1.0.jar",
-                    "url" : "{TODO}",
+                    "url" : "https://ateranimavis.github.io/maven/net/minecraftforge_temp/legacy/legacyfixer/1.0/legacyfixer-1.0.jar",
                     "sha1" : "6f09db7f7a4d6241bbd9556556b03ea664ddf567",
                     "size" : 6171
                 }

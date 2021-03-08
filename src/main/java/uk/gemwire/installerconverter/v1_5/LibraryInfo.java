@@ -2,23 +2,20 @@ package uk.gemwire.installerconverter.v1_5;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.legacy.LibraryTransformers;
 import uk.gemwire.installerconverter.util.JacksonUsed;
 import uk.gemwire.installerconverter.util.maven.Artifact;
-import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
+import uk.gemwire.installerconverter.util.maven.ArtifactKey;
 import uk.gemwire.installerconverter.util.maven.Maven;
+import uk.gemwire.installerconverter.v1_5.conversion.CommonContext;
+import uk.gemwire.installerconverter.v1_5.conversion.IConvertable;
 
 public final class LibraryInfo implements IConvertable<ObjectNode, CommonContext> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(LibraryInfo.class);
 
     private Artifact gav;
     private List<String> checksums;
@@ -31,8 +28,8 @@ public final class LibraryInfo implements IConvertable<ObjectNode, CommonContext
     private ObjectNode natives;
 
     @JacksonUsed
-    public void setName(String name) {
-        this.gav = Artifact.of(name);
+    public void setName(Artifact gav) {
+        this.gav = gav;
     }
 
     @JacksonUsed
@@ -94,26 +91,11 @@ public final class LibraryInfo implements IConvertable<ObjectNode, CommonContext
 
     @Override
     public ObjectNode convert(CommonContext context, JsonNodeFactory factory) throws IOException {
-        // Legacy Forge Conversion (1.6.x / 1.5.x)
-        upgradeLegacyForge(context.minecraft());
-
         //TODO: Handle clientreq / serverreq - What do we need to do with them
 
-        ObjectNode downloads = factory.objectNode();
-
-        //TODO: Testing
-        if (gav.classifier() != null) {
-            ObjectNode classifiers = factory.objectNode();
-            classifiers.set(gav.classifier(), convertArtifact(context.config(), factory));
-
-            downloads.set("classifiers", classifiers);
-        } else {
-            downloads.set("artifact", convertArtifact(context.config(), factory));
-        }
-
-        ObjectNode node = factory.objectNode();
-        node.put("name", gav.asString());
-        node.set("downloads", downloads);
+        ObjectNode node = gav.classifier() != null
+            ? wrapClassifier(ArtifactKey.of(url, gav), context.config(), factory)
+            : wrapArtifact(gav.asString(), ArtifactKey.of(url, gav), context.config(), factory);
 
         if (natives != null) node.set("natives", natives);
         if (rules != null) node.set("rules", rules);
@@ -122,34 +104,43 @@ public final class LibraryInfo implements IConvertable<ObjectNode, CommonContext
         return node;
     }
 
-    private ObjectNode convertArtifact(Config config, JsonNodeFactory factory) throws IOException {
-        String path = gav.asPath();
-        String finalURL = url + path;
-
-        LOGGER.debug("Resolving: " + finalURL);
-
-        ObjectNode artifact = factory.objectNode();
-        artifact.put("path", path);
-
-        CachedArtifactInfo data = config.resolver().resolve(url, gav);
-
-        if (data == null) throw new IOException(String.format("Couldn't get Sha1 or Size for '%s' from '%s'", gav.asStringWithClassifier(), url));
-
-        artifact.put("url", data.url());
-        artifact.put("sha1", data.sha1Hash());
-        artifact.put("size", data.expectedSize());
-
-        return artifact;
-    }
-
-    private void upgradeLegacyForge(String minecraft) {
-        if (!Objects.equals(gav.artifact(), "minecraftforge")) return;
-
-        gav = new Artifact(gav.group(), "forge", minecraft + "-" + gav.version(), null);
-    }
-
     public void standardise(String minecraft) {
         LibraryTransformers.execute(minecraft, this);
     }
 
+    public static ObjectNode wrapArtifact(String name, ArtifactKey artifact, Config config, JsonNodeFactory factory) throws IOException {
+        ObjectNode downloads = factory.objectNode();
+        downloads.set("artifact", artifact.convert(config, factory));
+
+        ObjectNode node = factory.objectNode();
+        node.put("name", name);
+        node.set("downloads", downloads);
+
+        return node;
+    }
+
+    public static ObjectNode wrapClassifier(ArtifactKey artifact, Config config, JsonNodeFactory factory) throws IOException {
+        ObjectNode classifiers = factory.objectNode();
+        classifiers.set(artifact.artifact().classifier(), artifact.convert(config, factory));
+
+        ObjectNode downloads = factory.objectNode();
+        downloads.set("classifiers", classifiers);
+
+        ObjectNode node = factory.objectNode();
+        node.put("name", artifact.artifact().asString());
+        node.set("downloads", downloads);
+
+        return node;
+    }
+
+    public static LibraryInfo of(ArtifactKey key) {
+        LibraryInfo info = new LibraryInfo();
+        info.setUrl(key.host());
+        info.setGav(key.artifact());
+        return info;
+    }
+
+    public boolean isServerReq() {
+        return serverreq;
+    }
 }

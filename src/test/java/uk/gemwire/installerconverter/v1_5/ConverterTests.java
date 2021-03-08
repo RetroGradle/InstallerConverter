@@ -15,6 +15,8 @@ import uk.gemwire.installerconverter.util.Jackson;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 import uk.gemwire.installerconverter.util.maven.Maven;
+import uk.gemwire.installerconverter.v1_5.conversion.CommonContext;
+import uk.gemwire.installerconverter.v1_5.conversion.IConvertable;
 import uk.gemwire.installerconverter.v1_5.util.TestResolver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,6 +42,7 @@ public class ConverterTests {
             .withCachingResolver() //TODO: .withResolver(TestResolver)
             .setup()
             .transformResolver(resolver -> new TestResolver(resolver)
+                .add(Maven.FORGE, Artifact.of("net.minecraftforge:forge:1.12.2-14.23.5.2847"), CachedArtifactInfo.of("c15dbf708064a9db9a9d66dd84688b9f31b6006e", 4884700, ""))
                 .add(Maven.FORGE, Artifact.of("net.minecraftforge:forge:1.6.4-9.11.1.965"), CachedArtifactInfo.of("36cc314edb97df84528382d5c3d2cce46d75de11", 1972443, ""))
                 .add(Maven.FORGE, Artifact.of("net.minecraftforge:forge:1.5.2-7.8.1.738"), CachedArtifactInfo.of("76223709288287a6a8d22ab16b43a6ab2a284a0d", 2033732,""))
             );

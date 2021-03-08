@@ -1,4 +1,4 @@
-package uk.gemwire.installerconverter.v1_5;
+package uk.gemwire.installerconverter.v1_5.conversion;
 
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;

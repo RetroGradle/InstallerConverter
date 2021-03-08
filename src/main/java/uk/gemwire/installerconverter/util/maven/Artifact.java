@@ -2,6 +2,10 @@ package uk.gemwire.installerconverter.util.maven;
 
 import javax.annotation.Nullable;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.util.StdConverter;
+
+@JsonDeserialize(converter = Artifact.Converter.class)
 public record Artifact(String group, String artifact, String version, @Nullable String classifier) {
 
     public static Artifact of(String gav) {
@@ -29,4 +33,12 @@ public record Artifact(String group, String artifact, String version, @Nullable 
     public String toString() {
         return asStringWithClassifier();
     }
+
+    public static class Converter extends StdConverter<String, Artifact> {
+        @Override
+        public Artifact convert(String value) {
+            return Artifact.of(value);
+        }
+    }
+
 }

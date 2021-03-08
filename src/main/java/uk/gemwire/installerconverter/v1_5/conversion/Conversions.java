@@ -1,4 +1,4 @@
-package uk.gemwire.installerconverter.v1_5;
+package uk.gemwire.installerconverter.v1_5.conversion;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -19,6 +19,18 @@ public abstract class Conversions {
         }
 
         return parts[0] + "-forge-" + parts[2];
+    }
+
+    public static String convertVersion(String version) throws IllegalArgumentException {
+        String[] parts = version.split("-");
+
+        if (parts.length < 2 || parts.length > 3) throw new IllegalArgumentException("Invalid version length: " + version);
+
+        if (parts.length == 2 || Objects.equals(parts[0], parts[2])) {
+            return parts[0] + "-" + parts[1];
+        }
+
+        throw new IllegalArgumentException("Invalid version: " + version);
     }
 
     public static ArrayNode createCommentNode(JsonNodeFactory factory) {

@@ -1,0 +1,67 @@
+{
+    "_comment_" : [
+        "Please do not automate the download and installation of Forge.",
+        "Our efforts are supported by ads from the download page.",
+        "If you MUST automate this, please consider supporting the project through https://www.patreon.com/LexManos/"
+    ],
+    "spec" : 0,
+    "profile" : "forge",
+    "version" : "1.6.1-forge-8.9.0.749",
+    "icon" : "{ICON}",
+    "json" : "/version.json",
+    "path" : "net.minecraftforge:forge:1.6.1-8.9.0.749",
+    "logo" : "/big_logo.png",
+    "minecraft" : "1.6.1",
+    "welcome" : "Welcome to the simple Forge installer.",
+    "data" : { },
+    "processors" : [
+        {
+            "jar" : "uk.gemwire:RetroInstallerTools:0.1:fatjar",
+            "args" : [
+                "--task",
+                "COPY_RELATIVE",
+                "--input",
+                "[net.minecraftforge.lex:legacyjavafixer:1.0]",
+                "--base",
+                "{BASE_DIRECTORY}",
+                "--path",
+                "mods"
+            ]
+        }
+    ],
+    "libraries" : [
+        {
+            "name" : "uk.gemwire:RetroInstallerTools:0.1:fatjar",
+            "downloads" : {
+                "artifact" : {
+                    "path" : "uk/gemwire/RetroInstallerTools/0.1/RetroInstallerTools-0.1-fatjar.jar",
+                    "url" : "https://ateranimavis.github.io/maven/uk/gemwire/RetroInstallerTools/0.1/RetroInstallerTools-0.1-fatjar.jar",
+                    "sha1" : "f5c7f5a56bc8bc30fd28a1760ea40949401b822f",
+                    "size" : 123826
+                }
+            }
+        },
+        {
+            "name" : "net.minecraftforge.lex:legacyjavafixer:1.0",
+            "downloads" : {
+                "artifact" : {
+                    "path" : "net/minecraftforge/lex/legacyjavafixer/1.0/legacyjavafixer-1.0.jar",
+                    "url" : "https://ateranimavis.github.io/maven/net/minecraftforge/lex/legacyjavafixer/1.0/legacyjavafixer-1.0.jar",
+                    "sha1" : "a11b502bef19f49bfc199722b94da5f3d7b470a8",
+                    "size" : 6245
+                }
+            }
+        },
+        {
+            "name" : "net.minecraftforge:forge:1.6.1-8.9.0.749",
+            "downloads" : {
+                "artifact" : {
+                    "path" : "net/minecraftforge/forge/1.6.1-8.9.0.749/forge-1.6.1-8.9.0.749.jar",
+                    "url" : "",
+                    "sha1" : "{SHA1}",
+                    "size" : -1
+                }
+            }
+        }
+    ]
+}

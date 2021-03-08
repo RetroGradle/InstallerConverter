@@ -41,6 +41,8 @@ public class CachedResolver implements IResolver {
             String host = k.host();
             String artifact = k.artifact().asStringWithClassifier();
 
+            if (artifact.startsWith("uk.gemwire")) continue; // We don't cache in development
+
             CachedArtifactInfo v = entry.getValue();
             String sha1 = v.sha1Hash();
             long expectedSize = v.expectedSize();

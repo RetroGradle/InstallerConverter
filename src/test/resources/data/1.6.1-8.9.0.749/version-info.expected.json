@@ -4,24 +4,24 @@
         "Our efforts are supported by ads from the download page.",
         "If you MUST automate this, please consider supporting the project through https://www.patreon.com/LexManos/"
     ],
-    "id" : "1.6.4-forge-9.11.1.965",
-    "time" : "2013-12-18T00:41:38-0500",
+    "id" : "1.6.1-forge-8.9.0.749",
+    "time" : "1960-01-01T00:00:00-0700",
     "releaseTime" : "1960-01-01T00:00:00-0700",
     "type" : "release",
     "mainClass" : "net.minecraft.launchwrapper.Launch",
-    "inheritsFrom" : "1.6.4",
+    "inheritsFrom" : "1.6.1",
     "minecraftArguments" : "--username ${auth_player_name} --session ${auth_session} --version ${version_name} --gameDir ${game_directory} --assetsDir ${game_assets} --tweakClass cpw.mods.fml.common.launcher.FMLTweaker",
     "minimumLauncherVersion" : 4,
     "processArguments" : "username_session_version",
     "libraries" : [
         {
-            "name" : "net.minecraftforge:forge:1.6.4-9.11.1.965",
+            "name" : "net.minecraftforge:forge:1.6.1-8.9.0.749",
             "downloads" : {
                 "artifact" : {
-                    "path" : "net/minecraftforge/forge/1.6.4-9.11.1.965/forge-1.6.4-9.11.1.965.jar",
+                    "path" : "net/minecraftforge/forge/1.6.1-8.9.0.749/forge-1.6.1-8.9.0.749.jar",
                     "url" : "",
-                    "sha1" : "36cc314edb97df84528382d5c3d2cce46d75de11",
-                    "size" : 1972443
+                    "sha1" : "{SHA1}",
+                    "size" : -1
                 }
             }
         },

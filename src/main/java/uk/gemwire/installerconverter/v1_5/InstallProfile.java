@@ -5,17 +5,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.JacksonUsed;
-import uk.gemwire.installerconverter.util.common.Pair;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 import uk.gemwire.installerconverter.util.maven.Maven;
+import uk.gemwire.installerconverter.v1_5.conversion.CommonContext;
+import uk.gemwire.installerconverter.v1_5.conversion.Converted;
+import uk.gemwire.installerconverter.v1_5.conversion.IConvertable;
 
-public final class InstallProfile implements IConvertable<Pair<ObjectNode, ObjectNode>, Config> {
+public final class InstallProfile implements IConvertable<Converted, Config> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstallProfile.class);
 
@@ -52,15 +53,15 @@ public final class InstallProfile implements IConvertable<Pair<ObjectNode, Objec
     }
 
     @Override
-    public Pair<ObjectNode, ObjectNode> convert(Config config, JsonNodeFactory factory) throws IOException {
+    public Converted convert(Config config, JsonNodeFactory factory) throws IOException {
         String minecraft = install.getMinecraft();
         CachedArtifactInfo client = null;
         CachedArtifactInfo server = null;
-        if (minecraft.startsWith("1.5")) {
-            client = config.resolver().resolve(Maven.FAKE, Artifact.of("net.minecraft:client:{version}:stripped".replace("{version}", minecraft))); // CachedArtifactInfo.of("90f9a7e7e651990b2dc81bfeb10f2b01f6956165", 0, "");
+        if (minecraft.startsWith("1.5")) { //TODO:
+            client = config.resolver().resolve(Maven.FAKE, Artifact.of("net.minecraft:client:{version}:stripped".replace("{version}", minecraft)));
             server = config.resolver().resolve(Maven.FAKE, Artifact.of("net.minecraft:server:{version}:stripped".replace("{version}", minecraft)));
         }
 
-        return Pair.of(install.convert(CommonContext.of(config, minecraft, client, server), factory), versionInfo.convert(CommonContext.of(config, minecraft, client, server), factory));
+        return Converted.of(install.convert(CommonContext.of(config, minecraft, client, server), factory), versionInfo.convert(CommonContext.of(config, minecraft, client, server), factory));
     }
 }

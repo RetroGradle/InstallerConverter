@@ -35,7 +35,7 @@ public record Config(String installerVersion, boolean overrideBigLogo, String ic
         Function<IResolver, IResolver> fromLocalMaven = (f) -> new LocalResolver(localMaven, f);
         Function<IResolver, IResolver> fromLegacy = LegacyFMLResolver::new;
         Function<IResolver, IResolver> fromRemote = RemoteResolver::new;
-        return withResolver(caching.compose(fromLocalMaven).compose(fromLegacy).compose(fromRemote).apply(null));
+        return withResolver(caching.compose(fromLegacy).compose(fromLocalMaven).compose(fromRemote).apply(null));
     }
 
     public Config withInstaller(String installerVersion) {

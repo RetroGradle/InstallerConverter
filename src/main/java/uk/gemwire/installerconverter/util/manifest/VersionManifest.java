@@ -31,11 +31,12 @@ public abstract class VersionManifest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Installers.class);
     private static final String VERSION_MANIFEST = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
+    private static final String VERSION_MANIFEST_V2 = "https://launchermeta.mojang.com/mc/game/version_manifest_v2.json";
 
     //==================================================================================================================
 
     public static void main(String[] args) throws Exception {
-        ObjectNode manifest = Jackson.read(Files.readString(cachedVersionManifest()));
+        ObjectNode manifest = Jackson.read(Files.readString(cachedVersionManifestV2()));
 
         Predicate<VersionInfo> RELEASES  = version -> Objects.equals(version.type(), "release");
         Predicate<VersionInfo> OLD_BETA  = version -> Objects.equals(version.type(), "old_beta");
@@ -50,7 +51,7 @@ public abstract class VersionManifest {
         List<String> versions =
             getVersionInfos(manifest.withArray("versions"))
                 .stream()
-                .filter(RELEASES.or(OLD_BETA).or(OLD_ALPHA))
+                .filter(filterById("1.5.2"))
                 .map(VersionInfo::id)
                 .sorted()
                 .collect(Collectors.toList());
@@ -81,12 +82,19 @@ public abstract class VersionManifest {
     }
 
     private static Path cachedVersionManifest() {
-        return Caching.cached("version-manifest.json", (destination) -> {
-            LOGGER.info("Downloading version-manifest {}...", destination);
-            try (InputStream in = Maven.download(new URL(VERSION_MANIFEST))) {
+        return cachedVersionManifest("version-manifest", VERSION_MANIFEST);
+    }
+
+    private static Path cachedVersionManifestV2() {
+        return cachedVersionManifest("version-manifest-v2", VERSION_MANIFEST_V2);
+    }
+
+    private static Path cachedVersionManifest(String name, String url) {
+        return Caching.cached(name + ".json", (destination) -> {
+            LOGGER.info("Downloading " + name + " {}...", destination);
+            try (InputStream in = Maven.download(new URL(url))) {
                 Files.copy(in, destination, StandardCopyOption.REPLACE_EXISTING);
             }
-            LOGGER.info("Downloaded version-manifest!");
         });
     }
 
@@ -130,11 +138,10 @@ public abstract class VersionManifest {
     private static void download(String version, Path destination) throws IOException {
         Files.createDirectories(destination.getParent());
 
-        LOGGER.info("Downloading version-manifest {} to {}...", version, destination);
+        LOGGER.info("Downloading launcher-meta {} to {}...", version, destination);
         try (InputStream in = Maven.download(new URL(getVersionUrl(version)))) {
             Files.copy(in, destination, StandardCopyOption.REPLACE_EXISTING);
         }
-        LOGGER.info("Downloaded version-manifest!");
     }
 
     private static String getVersionUrl(String version) throws IOException {
@@ -144,7 +151,7 @@ public abstract class VersionManifest {
     }
 
     private static String getVersionManifest() throws IOException {
-        LOGGER.info("Downloading version-manifest-all");
+        LOGGER.info("Downloading version-manifest");
         try (InputStream in = Maven.download(new URL(VERSION_MANIFEST))) {
             return IO.toString(in);
         }

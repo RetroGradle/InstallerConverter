@@ -41,6 +41,11 @@ public class LocalResolver extends AbstractResolver {
             // Otherwise calculate from Local
             CachedArtifactInfo fromLocal = Hashing.calculateSHA1andSize(stream, host + path);
 
+            if (artifact.group().startsWith("uk.gemwire")) {
+                LOGGER.warn("Using local copy of artifact {} from host {}", artifact, host);
+                return fromLocal;
+            }
+
             try {
                 // Download the remote sha1
                 String remoteHash = Maven.downloadSha1(new URL(host + path + ".sha1"));
