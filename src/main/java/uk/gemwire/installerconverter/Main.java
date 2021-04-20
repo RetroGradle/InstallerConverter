@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.util.Jackson;
 import uk.gemwire.installerconverter.util.maven.ArtifactKey;
+import uk.gemwire.installerconverter.util.maven.Maven;
 
 /**
  * @author RetroGradle
@@ -37,7 +38,10 @@ public class Main {
             .withCachingResolver();
 
         config.setup();
-        //debugResolve(config, ArtifactKey.of(Maven.FORGE, "net.minecraftforge:forge:1.5.2-7.8.1.738:client"));
+        debugResolve(config, ArtifactKey.of(Maven.FORGE, "net.minecraftforge.lex:legacyjavafixer:1.0"));
+
+        if (true) return;
+
         //debugResolve(config, ArtifactKey.of("org.bouncycastle:bcprov-jdk15on:1.47"));
 
         /* Testing Versions
@@ -78,16 +82,6 @@ public class Main {
 
                     if (hasInstaller(path)) {
                         InstallerConverter.convert(config, asInstaller(path), version);
-                        continue;
-                    }
-
-                    if (hasUniversalZip(path)) {
-                        InstallerConverter.generate(config, asUniversalZip(path), version);
-                        continue;
-                    }
-
-                    if (hasUniversalJar(path)) {
-                        InstallerConverter.generate(config, asUniversalJar(path), version);
                         continue;
                     }
 

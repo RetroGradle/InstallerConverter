@@ -10,7 +10,6 @@ import java.util.function.Function;
 
 import uk.gemwire.installerconverter.resolver.CachedResolver;
 import uk.gemwire.installerconverter.resolver.IResolver;
-import uk.gemwire.installerconverter.resolver.LegacyFMLResolver;
 import uk.gemwire.installerconverter.resolver.LocalResolver;
 import uk.gemwire.installerconverter.resolver.MemoryResolver;
 import uk.gemwire.installerconverter.resolver.RemoteResolver;
@@ -33,9 +32,8 @@ public record Config(String installerVersion, boolean overrideBigLogo, String ic
     public Config withCachingResolver() {
         Function<IResolver, IResolver> caching = CachedResolver::new;
         Function<IResolver, IResolver> fromLocalMaven = (f) -> new LocalResolver(localMaven, f);
-        Function<IResolver, IResolver> fromLegacy = LegacyFMLResolver::new;
         Function<IResolver, IResolver> fromRemote = RemoteResolver::new;
-        return withResolver(caching.compose(fromLegacy).compose(fromLocalMaven).compose(fromRemote).apply(null));
+        return withResolver(caching.compose(fromLocalMaven).compose(fromRemote).apply(null));
     }
 
     public Config withInstaller(String installerVersion) {

@@ -9,9 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.JacksonUsed;
-import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
-import uk.gemwire.installerconverter.util.maven.Maven;
 import uk.gemwire.installerconverter.v1_5.conversion.CommonContext;
 import uk.gemwire.installerconverter.v1_5.conversion.Converted;
 import uk.gemwire.installerconverter.v1_5.conversion.IConvertable;
@@ -57,10 +55,6 @@ public final class InstallProfile implements IConvertable<Converted, Config> {
         String minecraft = install.getMinecraft();
         CachedArtifactInfo client = null;
         CachedArtifactInfo server = null;
-        if (minecraft.startsWith("1.5")) { //TODO:
-            client = config.resolver().resolve(Maven.FAKE, Artifact.of("net.minecraft:client:{version}:stripped".replace("{version}", minecraft)));
-            server = config.resolver().resolve(Maven.FAKE, Artifact.of("net.minecraft:server:{version}:stripped".replace("{version}", minecraft)));
-        }
 
         return Converted.of(install.convert(CommonContext.of(config, minecraft, client, server), factory), versionInfo.convert(CommonContext.of(config, minecraft, client, server), factory));
     }

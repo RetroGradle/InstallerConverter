@@ -2,18 +2,15 @@ package uk.gemwire.installerconverter.v1_5;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import uk.gemwire.installerconverter.resolver.retrotools.ClasspathJar;
 import uk.gemwire.installerconverter.util.JacksonUsed;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.ArtifactKey;
-import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 import uk.gemwire.installerconverter.util.maven.Maven;
 import uk.gemwire.installerconverter.v1_5.conversion.CommonContext;
 import uk.gemwire.installerconverter.v1_5.conversion.Conversions;
@@ -180,8 +177,6 @@ public final class Install implements IConvertable<ObjectNode, CommonContext> {
         if (libraries == null) libraries = factory.arrayNode();
 
         if (minecraft.startsWith("1.7.")) transform_1_7_or_1_6(context, factory);
-        if (minecraft.startsWith("1.6.")) transform_1_7_or_1_6(context, factory);
-        if (minecraft.startsWith("1.5.")) transform_1_5(context, factory);
 
         node.set("data", data);
         node.set("processors", processors);
@@ -210,9 +205,7 @@ public final class Install implements IConvertable<ObjectNode, CommonContext> {
 
     private void transform_1_7_or_1_6(CommonContext context, JsonNodeFactory factory) throws IOException {
         RETRO_TOOLS.injectLibraries(libraries, context.config(), factory);
-        Processor.inject(ArtifactKey.of(Maven.ATERANIMAVIS, "net.minecraftforge.lex:legacyjavafixer:1.0"), libraries, context.config(), factory);
-
-        //TODO: 1.6 need a minecraft_server with ClassPath (1.6.3-9.11.0.873)
+        Processor.inject(ArtifactKey.of(Maven.FORGE, "net.minecraftforge.lex:legacyjavafixer:1.0"), libraries, context.config(), factory);
 
         List<ProcessorStep> steps = List.of(
             // Both: Copy LegacyJavaFixer to Mods folder
@@ -222,125 +215,6 @@ public final class Install implements IConvertable<ObjectNode, CommonContext> {
                 "--input", "[net.minecraftforge.lex:legacyjavafixer:1.0]",
                 "--base", "{BASE_DIRECTORY}",
                 "--path", "mods"
-            )
-        );
-
-        steps.forEach(step -> processors.add(step.toNode(factory)));
-    }
-
-    private void transform_1_5(CommonContext context, JsonNodeFactory factory) throws IOException {
-        //TODO: Test a rename of minecraft_server.1.12.2 to minecraft_server
-        //TODO: A rename of minecraft_server.1.12.2 to minecraft_server works...
-        //TODO: Do something with injecting ClassPath into server instead of forge? we can then cache that as should be same for most versions
-
-        RETRO_TOOLS.injectLibraries(libraries, context.config(), factory);
-        Processor.inject(ArtifactKey.of(Maven.ATERANIMAVIS, "net.minecraftforge_temp.legacy:legacyfixer:1.0"), libraries, context.config(), factory);
-
-        data.set("STRIPPED", factory.objectNode()
-            .put("client", "[net.minecraft:client:" + minecraft + ":stripped]")
-            .put("server", "[net.minecraft:server:" + minecraft + ":stripped]")
-        );
-        data.set("STRIPPED_SHA1", factory.objectNode()
-            .put("client", "'{SHA1}'".replace("{SHA1}", context.client().sha1Hash()))
-            .put("server", "'{SHA1}'".replace("{SHA1}", context.server().sha1Hash()))
-        );
-
-        String[] classpath_args = new String[] {
-            "--task", "GENERATE_CLASSPATH_JAR",
-            "--output", "{CLASSPATH}",
-            "--classpath", "org.ow2.asm:asm-all:4.1",
-            "--classpath", "org.scala-lang:scala-library:2.10.0-custom",
-            "--classpath", "net.sourceforge.argo:argo:3.2-small",
-            "--classpath", "org.bouncycastle:bcprov-jdk15on:1.47",
-            "--classpath", "com.google.guava:guava:14.0",
-            "--classpath", "minecraft_server.{version}.jar".replace("{version}", minecraft)
-        };
-
-        CachedArtifactInfo classpath = ClasspathJar.provide(minecraft, classpath_args);
-
-        data.set("CLASSPATH", factory.objectNode()
-            .put("client", "''")
-            .put("server", "[net.minecraftforge:server:{version}:classpath]".replace("{version}", version))
-        );
-
-        data.set("CLASSPATH_SHA1", factory.objectNode()
-            .put("client", "''")
-            .put("server", "'" + classpath.sha1Hash() + "'")
-        );
-
-        //List<ProcessorStep> steps = List.of(
-        //    // Client: Create a Stripped Jar
-        //    ProcessorStep.client(
-        //        RETRO_TOOLS,
-        //        Map.of("{STRIPPED}", "{STRIPPED_SHA1}"),
-        //        "--task", "STRIP_SIGNATURES",
-        //        "--input", "{MINECRAFT_JAR}",
-        //        "--output", "{STRIPPED}"
-        //    ),
-        //
-        //    // Client: Copy the Client Jar into Place
-        //    ProcessorStep.client(RETRO_TOOLS, "--task", "COPY", "--input", "{STRIPPED}", "--output", "{TARGET_JAR}"),
-        //
-        //    // Server: Inject Classpath Entry to Manifest
-        //    ProcessorStep.server(
-        //        RETRO_TOOLS,
-        //        // Map.of("{CLASSPATH}", "{CLASSPATH_SHA1}"), //TODO: Should we calculate a SHA1 of this? Means we have to do so for all forge versions
-        //        "--task", "INJECT_CLASSPATH",
-        //        "--input", "{TARGET_JAR}",
-        //        "--output", "{TARGET_JAR}",
-        //        "--classpath", "org.ow2.asm:asm-all:4.1",
-        //        "--classpath", "org.scala-lang:scala-library:2.10.0-custom",
-        //        "--classpath", "net.sourceforge.argo:argo:3.2-small",
-        //        "--classpath", "org.bouncycastle:bcprov-jdk15on:1.47",
-        //        "--classpath", "com.google.guava:guava:14.0",
-        //        "--classpath", "minecraft_server.{version}.jar".replace("{version}", minecraft)
-        //    ),
-        //
-        //    // Server: Copy LegacyFixer to CoreMods folder, Client provides it via launcher json
-        //    ProcessorStep.server(RETRO_TOOLS,
-        //        "--task", "COPY_RELATIVE",
-        //        "--input", "[net.minecraftforge_temp.legacy:legacyfixer:1.0]",
-        //        "--base", "{BASE_DIRECTORY}",
-        //        "--path", "coremods"
-        //    )
-        //);
-
-        List<ProcessorStep> steps = List.of(
-            // Client: Create a Stripped Jar
-            ProcessorStep.client(
-                RETRO_TOOLS,
-                Map.of("{STRIPPED}", "{STRIPPED_SHA1}"),
-                "--task", "STRIP_SIGNATURES",
-                "--input", "{MINECRAFT_JAR}",
-                "--output", "{STRIPPED}"
-            ),
-
-            // Client: Copy the Client Jar into Place
-            ProcessorStep.client(RETRO_TOOLS, "--task", "COPY", "--input", "{STRIPPED}", "--output", "{TARGET_JAR}"),
-
-            // Server: Inject Classpath Entry to Manifest
-            ProcessorStep.server(
-                RETRO_TOOLS,
-                 Map.of("{CLASSPATH}", "{CLASSPATH_SHA1}"),
-                classpath_args
-            ),
-
-            // Server: Copy Generated ClassPath Jar as minecraft_server.jar
-            ProcessorStep.server(
-                RETRO_TOOLS,
-                "--task", "COPY_RELATIVE",
-                "--input", "{CLASSPATH}",
-                "--base", "{BASE_DIRECTORY}",
-                "--path", "minecraft_server.jar"
-            ),
-
-            // Server: Copy LegacyFixer to CoreMods folder, Client provides it via launcher json
-            ProcessorStep.server(
-                RETRO_TOOLS,
-                "--task", "COPY_RELATIVE",
-                "--input", "[net.minecraftforge_temp.legacy:legacyfixer:1.0]",
-                "--base", "{BASE_DIRECTORY}",
-                "--path", "coremods"
             )
         );
 
