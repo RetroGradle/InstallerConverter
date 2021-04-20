@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.util.Jackson;
 import uk.gemwire.installerconverter.util.maven.ArtifactKey;
-import uk.gemwire.installerconverter.util.maven.Maven;
 
 /**
  * @author RetroGradle
@@ -38,10 +37,7 @@ public class Main {
             .withCachingResolver();
 
         config.setup();
-        debugResolve(config, ArtifactKey.of(Maven.FORGE, "net.minecraftforge.lex:legacyjavafixer:1.0"));
-
-        if (true) return;
-
+        // debugResolve(config, ArtifactKey.of(Maven.FORGE, "net.minecraftforge.lex:legacyjavafixer:1.0"));
         //debugResolve(config, ArtifactKey.of("org.bouncycastle:bcprov-jdk15on:1.47"));
 
         /* Testing Versions
@@ -60,7 +56,7 @@ public class Main {
         .cache\local\net\minecraftforge\forge\1.9.4-12.17.0.2051
          */
 
-        Predicate<String> predicate = (value) -> java.util.Objects.equals(value, "1.12.2-14.23.5.2847"); // ""1.6.1-8.9.0.749"); // "1.5.2-7.8.1.738"); // "1.6.4-9.11.1.965"); //
+        Predicate<String> predicate = (value) -> java.util.Objects.equals(value, "1.7.10-10.13.4.1614-1.7.10"); // ""1.6.1-8.9.0.749"); // "1.5.2-7.8.1.738"); // "1.6.4-9.11.1.965"); //
 
         try {
             //InstallerConverter.convert(config, "1.5.2-7.8.1.738");
