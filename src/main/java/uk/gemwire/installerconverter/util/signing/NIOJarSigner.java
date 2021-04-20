@@ -36,10 +36,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -48,10 +48,14 @@ import com.sun.jarsigner.ContentSigner;
 import com.sun.jarsigner.ContentSignerParameters;
 import jdk.security.jarsigner.JarSigner;
 import jdk.security.jarsigner.JarSignerException;
+import sun.security.pkcs.PKCS7;
+import sun.security.pkcs.PKCS9Attribute;
+import sun.security.pkcs.PKCS9Attributes;
+import sun.security.timestamp.HttpTimestamper;
 import sun.security.tools.PathList;
-import sun.security.tools.jarsigner.TimestampedSigner;
 import sun.security.util.ManifestDigester;
 import sun.security.util.SignatureFileVerifier;
+import sun.security.util.SignatureUtil;
 import sun.security.x509.AlgorithmId;
 
 public class NIOJarSigner {
@@ -74,8 +78,8 @@ public class NIOJarSigner {
         // Implementation-specific properties:
         String tSAPolicyID;
         String tSADigestAlg;
-        boolean signManifest = true;
-        boolean externalSF = true;
+        boolean sectionsonly = false;
+        boolean internalsf = false;
         String altSignerPath;
         String altSigner;
 
@@ -130,7 +134,7 @@ public class NIOJarSigner {
             throws NoSuchAlgorithmException {
             // Check availability
             Signature.getInstance(Objects.requireNonNull(algorithm));
-            AlgorithmId.checkKeyAndSigAlgMatch(privateKey.getAlgorithm(), algorithm);
+            SignatureUtil.checkKeyAndSigAlgMatch(privateKey, algorithm);
             this.sigalg = algorithm;
             this.sigProvider = null;
             return this;
@@ -142,8 +146,7 @@ public class NIOJarSigner {
             Signature.getInstance(
                 Objects.requireNonNull(algorithm),
                 Objects.requireNonNull(provider));
-            AlgorithmId.checkKeyAndSigAlgMatch(
-                privateKey.getAlgorithm(), algorithm);
+            SignatureUtil.checkKeyAndSigAlgMatch(privateKey, algorithm);
             this.sigalg = algorithm;
             this.sigProvider = provider;
             return this;
@@ -196,18 +199,10 @@ public class NIOJarSigner {
                     this.tSAPolicyID = value;
                     break;
                 case "internalsf":
-                    switch (value) {
-                        case "true" -> externalSF = false;
-                        case "false" -> externalSF = true;
-                        default -> throw new IllegalArgumentException("Invalid internalsf value");
-                    }
+                    this.internalsf = parseBoolean("interalsf", value);
                     break;
                 case "sectionsonly":
-                    switch (value) {
-                        case "true" -> signManifest = false;
-                        case "false" -> signManifest = true;
-                        default -> throw new IllegalArgumentException("Invalid signManifest value");
-                    }
+                    this.sectionsonly = parseBoolean("sectionsonly", value);
                     break;
                 case "altsignerpath":
                     altSignerPath = value;
@@ -219,6 +214,18 @@ public class NIOJarSigner {
                     throw new UnsupportedOperationException("Unsupported key " + key);
             }
             return this;
+        }
+
+        private static boolean parseBoolean(String name, String value) {
+            switch (value) {
+                case "true":
+                    return true;
+                case "false":
+                    return false;
+                default:
+                    throw new IllegalArgumentException(
+                            "Invalid " + name + " value");
+            }
         }
 
         public NIOJarSigner build() {
@@ -251,8 +258,8 @@ public class NIOJarSigner {
     // Implementation-specific properties:
     private final String tSAPolicyID;
     private final String tSADigestAlg;
-    private final boolean signManifest; // "sign" the whole manifest
-    private final boolean externalSF; // leave the .SF out of the PKCS7 block
+    private final boolean sectionsonly;
+    private final boolean internalsf;
     private final String altSignerPath;
     private final String altSigner;
 
@@ -279,10 +286,17 @@ public class NIOJarSigner {
 
         this.tSADigestAlg = builder.tSADigestAlg != null ? builder.tSADigestAlg : JarSigner.Builder.getDefaultDigestAlgorithm();
         this.tSAPolicyID = builder.tSAPolicyID;
-        this.signManifest = builder.signManifest;
-        this.externalSF = builder.externalSF;
+        this.sectionsonly = builder.sectionsonly;
+        this.internalsf = builder.internalsf;
         this.altSigner = builder.altSigner;
         this.altSignerPath = builder.altSignerPath;
+
+        // altSigner cannot support modern algorithms like RSASSA-PSS and EdDSA
+        if (altSigner != null
+                && !sigalg.toUpperCase(Locale.ENGLISH).contains("WITH")) {
+            throw new IllegalArgumentException(
+                    "Customized ContentSigner is not supported for " + sigalg);
+        }
     }
 
     public void sign(Path zipFile, OutputStream os) {
@@ -322,8 +336,8 @@ public class NIOJarSigner {
         return switch (key.toLowerCase(Locale.US)) {
             case "tsadigestalg" -> tSADigestAlg;
             case "tsapolicyid" -> tSAPolicyID;
-            case "internalsf" -> Boolean.toString(!externalSF);
-            case "sectionsonly" -> Boolean.toString(!signManifest);
+            case "internalsf" -> Boolean.toString(internalsf);
+            case "sectionsonly" -> Boolean.toString(sectionsonly);
             case "altsignerpath" -> altSignerPath;
             case "altsigner" -> altSigner;
             default -> throw new UnsupportedOperationException("Unsupported key " + key);
@@ -384,7 +398,7 @@ public class NIOJarSigner {
             AtomicBoolean wasSigned = new AtomicBoolean(false);
 
             for (Path root : fs.getRootDirectories()) {
-                for (Path path : Files.walk(root).collect(Collectors.toUnmodifiableList())) {
+                for (Path path : Files.walk(root).toList()) {
 
                     if (path.getFileName() == null) continue;
 
@@ -492,34 +506,54 @@ public class NIOJarSigner {
 
             // Calculate SignatureFile (".SF") and SignatureBlockFile
             ManifestDigester manDig = new ManifestDigester(mfRawBytes);
-            SignatureFile sf = new SignatureFile(digest, manifest, manDig, signerName, signManifest);
+            SignatureFile sf = new SignatureFile(digest, manifest, manDig, signerName, sectionsonly);
 
             byte[] block;
-
-            Signature signer;
-            if (sigProvider == null) {
-                signer = Signature.getInstance(sigalg);
-            } else {
-                signer = Signature.getInstance(sigalg, sigProvider);
-            }
-            signer.initSign(privateKey);
 
             baos.reset();
             sf.write(baos);
             byte[] content = baos.toByteArray();
 
-            signer.update(content);
-            byte[] signature = signer.sign();
+            if (altSigner == null) {
+                Function<byte[], PKCS9Attributes> timestamper = null;
+                if (tsaUrl != null) {
+                    timestamper = s -> {
+                        try {
+                            // Timestamp the signature
+                            HttpTimestamper tsa = new HttpTimestamper(tsaUrl);
+                            byte[] tsToken = PKCS7.generateTimestampToken(
+                                    tsa, tSAPolicyID, tSADigestAlg, s);
 
-            @SuppressWarnings("removal")
-            ContentSigner signingMechanism = null;
-            if (altSigner != null) {
-                signingMechanism = loadSigningMechanism(altSigner, altSignerPath);
+                            return new PKCS9Attributes(new PKCS9Attribute[]{
+                                    new PKCS9Attribute(
+                                            PKCS9Attribute.SIGNATURE_TIMESTAMP_TOKEN_OID,
+                                            tsToken)});
+                        } catch (IOException | CertificateException e) {
+                            throw new RuntimeException(e);
+                        }
+                    };
+                }
+                // We now create authAttrs in block data, so "direct == false".
+                block = PKCS7.generateNewSignedData(sigalg, sigProvider, privateKey, certChain,
+                        content, internalsf, false, timestamper);
+            } else {
+                Signature signer = SignatureUtil.fromKey(sigalg, privateKey, sigProvider);
+                signer.update(content);
+                byte[] signature = signer.sign();
+
+                @SuppressWarnings("removal")
+                ContentSignerParameters params =
+                        new NIOJarSignerParameters(null, tsaUrl, tSAPolicyID,
+                                tSADigestAlg, signature, signer.getAlgorithm(), certChain, content);
+                @SuppressWarnings("removal")
+                ContentSigner signingMechanism = loadSigningMechanism(altSigner, altSignerPath);
+                //noinspection removal
+                block = signingMechanism.generateSignedData(
+                        params,
+                        !internalsf,
+                        params.getTimestampingAuthority() != null
+                                || params.getTimestampingAuthorityCertificate() != null);
             }
-
-            @SuppressWarnings("removal")
-            ContentSignerParameters params = new NIOJarSignerParameters(null, tsaUrl, tSAPolicyID, tSADigestAlg, signature, signer.getAlgorithm(), certChain, content);
-            block = sf.generateBlock(params, externalSF, signingMechanism);
 
             String sfFilename = sf.getMetaName();
             String bkFilename = sf.getBlockName(privateKey);
@@ -582,9 +616,7 @@ public class NIOJarSigner {
 
             // Write out all other files
             for (Path root : fs.getRootDirectories()) {
-                List<Path> paths = Files.walk(root)
-                    .filter(Files::isRegularFile)
-                    .collect(Collectors.toUnmodifiableList());
+                List<Path> paths = Files.walk(root).filter(Files::isRegularFile).toList();
                 for (Path path : paths) {
                     if (!path.startsWith(META_INF)) {
                         if (handler != null) {
@@ -679,7 +711,7 @@ public class NIOJarSigner {
     }
 
     private String getDigest(Path path, MessageDigest digest) throws IOException {
-        int n, i;
+        int n;
         try (InputStream is = Files.newInputStream(path)) {
             long left = Files.size(path);
             byte[] buffer = new byte[8192];
@@ -739,7 +771,7 @@ public class NIOJarSigner {
                              Manifest mf,
                              ManifestDigester md,
                              String baseName,
-                             boolean signManifest) {
+                             boolean sectionsonly) {
 
             this.baseName = baseName;
 
@@ -752,7 +784,7 @@ public class NIOJarSigner {
             mattr.putValue(Attributes.Name.SIGNATURE_VERSION.toString(), "1.0");
             mattr.putValue("Created-By", version + " (" + javaVendor + ")");
 
-            if (signManifest) {
+            if (!sectionsonly) {
                 mattr.putValue(digest.getAlgorithm() + "-Digest-Manifest",
                     Base64.getEncoder().encodeToString(md.manifestDigest(digest)));
             }
@@ -798,23 +830,6 @@ public class NIOJarSigner {
         public String getBlockName(PrivateKey privateKey) {
             String keyAlgorithm = privateKey.getAlgorithm();
             return getBaseSignatureFilesName(baseName) + keyAlgorithm;
-        }
-
-        // Generates the PKCS#7 content of block file
-        @SuppressWarnings("removal")
-        public byte[] generateBlock(ContentSignerParameters params,
-                                    boolean externalSF,
-                                    ContentSigner signingMechanism)
-            throws NoSuchAlgorithmException,
-            IOException, CertificateException {
-
-            if (signingMechanism == null) {
-                signingMechanism = new TimestampedSigner();
-            }
-            return signingMechanism.generateSignedData(
-                params,
-                externalSF,
-                params.getTimestampingAuthority() != null || params.getTimestampingAuthorityCertificate() != null);
         }
     }
 
