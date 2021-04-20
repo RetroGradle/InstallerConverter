@@ -50,6 +50,14 @@ java {
 
 tasks.withType(JavaCompile) {
     options.compilerArgs += '--enable-preview'
+    options.compilerArgs.addAll([
+            "--add-exports", "java.base/sun.security.tools=ALL-UNNAMED",
+            "--add-exports", "jdk.jartool/sun.security.tools.jarsigner=ALL-UNNAMED",
+            "--add-exports", "java.base/sun.security.util=ALL-UNNAMED",
+            "--add-exports", "java.base/sun.security.x509=ALL-UNNAMED"
+    ])
+    sourceCompatibility = 15;
+    options.release = null;
 }
 
 tasks.withType(Test) {
