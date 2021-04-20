@@ -1,4 +1,48 @@
-package uk.gemwire.installerconverter.util;
+package uk.gemwire.installerconverter.util.signing;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.net.SocketTimeoutException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.cert.CertPath;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 import com.sun.jarsigner.ContentSigner;
 import com.sun.jarsigner.ContentSignerParameters;
@@ -9,30 +53,6 @@ import sun.security.tools.jarsigner.TimestampedSigner;
 import sun.security.util.ManifestDigester;
 import sun.security.util.SignatureFileVerifier;
 import sun.security.x509.AlgorithmId;
-
-import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.net.SocketTimeoutException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.*;
-import java.nio.file.attribute.FileTime;
-import java.security.*;
-import java.security.cert.CertPath;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiConsumer;
-import java.util.jar.Attributes;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
 
 public class NIOJarSigner {
 
@@ -84,7 +104,7 @@ public class NIOJarSigner {
             }
             this.privateKey = privateKey;
             try {
-                this.certChain = certs.toArray(new X509Certificate[certs.size()]);
+                this.certChain = certs.toArray(new X509Certificate[0]);
             } catch (ArrayStoreException ase) {
                 // Wrong type, not X509Certificate.
                 throw new IllegalArgumentException("Entry does not contain X509Certificate");
