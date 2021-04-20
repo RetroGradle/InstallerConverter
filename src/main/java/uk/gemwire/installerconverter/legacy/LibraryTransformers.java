@@ -33,6 +33,7 @@ public class LibraryTransformers {
     static Artifact SCALA_CUSTOM       = Artifact.of("org.scala-lang:scala-library:2.10.0-custom");
 
     static {
+        TRANSFORMERS.add(LibraryTransformers::transformForgeMaven);
         TRANSFORMERS.add(LibraryTransformers::transformForge);
         TRANSFORMERS.add(LibraryTransformers::transformAsm);
         TRANSFORMERS.add(LibraryTransformers::transformGuava14);
@@ -54,6 +55,10 @@ public class LibraryTransformers {
 
         libraryInfo.setUrl(info.host());
         libraryInfo.setGav(info.artifact());
+    }
+
+    private static ArtifactKey transformForgeMaven(String minecraft, ArtifactKey info) {
+        return transform(info, filterMaven(Maven.FORGE_OLD), (gav) -> gav, url -> Maven.FORGE);
     }
 
     private static ArtifactKey transformForge(String minecraft, ArtifactKey info) {
@@ -92,6 +97,10 @@ public class LibraryTransformers {
         if (!predicate.test(gav)) return info;
 
         return info.with(transform.apply(gav));
+    }
+
+    private static Predicate<ArtifactKey> filterMaven(String host) {
+        return info -> Objects.equals(host, info.host());
     }
 
     private static Predicate<ArtifactKey> filterArtifact(Artifact artifact) {

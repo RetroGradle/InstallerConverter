@@ -40,7 +40,23 @@ public class Main {
         //debugResolve(config, ArtifactKey.of(Maven.FORGE, "net.minecraftforge:forge:1.5.2-7.8.1.738:client"));
         //debugResolve(config, ArtifactKey.of("org.bouncycastle:bcprov-jdk15on:1.47"));
 
-        Predicate<String> predicate = (value) -> java.util.Objects.equals(value, "1.6.4-9.11.0.879"); // ""1.6.1-8.9.0.749"); // "1.5.2-7.8.1.738"); // "1.6.4-9.11.1.965"); //
+        /* Testing Versions
+        .cache\local\net\minecraftforge\forge\1.10.2-12.18.3.2511
+        .cache\local\net\minecraftforge\forge\1.11.2-13.20.1.2588
+        .cache\local\net\minecraftforge\forge\1.12.2-14.23.5.2847
+        .cache\local\net\minecraftforge\forge\1.12.2-14.23.5.2855
+        .cache\local\net\minecraftforge\forge\1.5.2-7.8.0.684
+        .cache\local\net\minecraftforge\forge\1.5.2-7.8.1.738
+        .cache\local\net\minecraftforge\forge\1.6.1-8.9.0.749
+        .cache\local\net\minecraftforge\forge\1.6.1-8.9.0.751
+        .cache\local\net\minecraftforge\forge\1.6.4-9.11.0.879
+        .cache\local\net\minecraftforge\forge\1.6.4-9.11.1.965
+        .cache\local\net\minecraftforge\forge\1.7.10-10.13.4.1614-1.7.10
+        .cache\local\net\minecraftforge\forge\1.8.9-11.15.1.2318-1.8.9
+        .cache\local\net\minecraftforge\forge\1.9.4-12.17.0.2051
+         */
+
+        Predicate<String> predicate = (value) -> java.util.Objects.equals(value, "1.12.2-14.23.5.2847"); // ""1.6.1-8.9.0.749"); // "1.5.2-7.8.1.738"); // "1.6.4-9.11.1.965"); //
 
         try {
             //InstallerConverter.convert(config, "1.5.2-7.8.1.738");
@@ -50,6 +66,7 @@ public class Main {
 
             long startTime = System.nanoTime();
             List<Path> versions = collectVersions(config).stream().sorted().collect(Collectors.toList()); //TODO: Proper Sort
+
             for (Path path : versions) {
                 String version = getVersion(path);
 

@@ -2,6 +2,7 @@ package uk.gemwire.installerconverter.v1_5;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -50,6 +51,9 @@ public final class LibraryInfo implements IConvertable<ObjectNode, CommonContext
     @JacksonUsed
     public void setUrl(String url) {
         this.url = url.replaceFirst("^http:", "https:") + (url.endsWith("/") ? "" : "/");
+
+        if (Objects.equals(this.url, Maven.FORGE_OLD))
+            this.url = Maven.FORGE;
     }
 
     @JacksonUsed
