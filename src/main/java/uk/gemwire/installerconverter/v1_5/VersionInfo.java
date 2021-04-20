@@ -14,11 +14,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Lists;
 import uk.gemwire.installerconverter.util.Jackson;
 import uk.gemwire.installerconverter.util.JacksonUsed;
-import uk.gemwire.installerconverter.util.manifest.VersionManifest;
-import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.ArtifactKey;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
-import uk.gemwire.installerconverter.util.maven.Maven;
 import uk.gemwire.installerconverter.v1_5.conversion.CommonContext;
 import uk.gemwire.installerconverter.v1_5.conversion.Conversions;
 import uk.gemwire.installerconverter.v1_5.conversion.IConvertable;
@@ -81,24 +78,6 @@ public final class VersionInfo implements IConvertable<ObjectNode, CommonContext
     @Override
     public ObjectNode convert(CommonContext context, JsonNodeFactory factory) throws IOException {
         ObjectNode node = factory.objectNode();
-
-        if (context.minecraft().startsWith("1.7.")) {
-            libraries.add(LibraryInfo.of(ArtifactKey.of(Maven.FORGE, "net.minecraftforge.lex:legacyjavafixer:1.0")));
-            data.put("minecraftArguments", factory.textNode(data.get("minecraftArguments").asText() + "--tweakClass net.minecraftforge.lex.legacyjavafixer.LegacyJavaFixer"));
-        }
-
-        // Legacy Forge Conversion (1.6.x / 1.5.x)
-        if (libraries.stream().map(LibraryInfo::getGav).map(Artifact::artifact).anyMatch(artifact -> Objects.equals("minecraftforge", artifact))) {
-            /* Standardised Legacy Libraries */
-            libraries.forEach(library -> library.standardise(context.minecraft()));
-
-            List<String> inheritLibraries = VersionManifest.provideLibraries(context.minecraft());
-
-            //TODO: isServerReq is used so we don't drop ow2.asm which isn't present in the server side libraries
-            libraries.removeIf(library -> !library.isServerReq() && inheritLibraries.contains(library.getGav().asStringWithClassifier()));
-
-            if (!data.containsKey("inheritsFrom")) data.put("inheritsFrom", factory.textNode(context.minecraft()));
-        }
 
         // Remove `jar` if == `inheritsFrom`
         potentiallyRemoveJar();

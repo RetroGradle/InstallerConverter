@@ -1,6 +1,7 @@
 package uk.gemwire.installerconverter.v1_5;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
@@ -9,10 +10,13 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import uk.gemwire.installerconverter.util.JacksonUsed;
 import uk.gemwire.installerconverter.util.maven.Artifact;
+import uk.gemwire.installerconverter.util.maven.ArtifactKey;
 import uk.gemwire.installerconverter.util.maven.Maven;
 import uk.gemwire.installerconverter.v1_5.conversion.CommonContext;
 import uk.gemwire.installerconverter.v1_5.conversion.Conversions;
 import uk.gemwire.installerconverter.v1_5.conversion.IConvertable;
+import uk.gemwire.installerconverter.v1_5.processor.Processor;
+import uk.gemwire.installerconverter.v1_5.processor.ProcessorStep;
 
 public final class Install implements IConvertable<ObjectNode, CommonContext> {
 
@@ -172,6 +176,8 @@ public final class Install implements IConvertable<ObjectNode, CommonContext> {
         if (processors == null) processors = factory.arrayNode();
         if (libraries == null) libraries = factory.arrayNode();
 
+        if (minecraft.startsWith("1.7.")) transform_1_7_or_1_6(context, factory);
+
         node.set("data", data);
         node.set("processors", processors);
 
@@ -181,6 +187,8 @@ public final class Install implements IConvertable<ObjectNode, CommonContext> {
         return node;
     }
 
+    private static final Processor INSTALLER_TOOLS = Processor.of(Maven.FORGE, "net.minecraftforge:installertools:1.2.1");
+
     /*
      * Can be in the following formats:
      * [value] - An absolute path to an artifact located in the target maven style repo.
@@ -188,11 +196,21 @@ public final class Install implements IConvertable<ObjectNode, CommonContext> {
      * value - A file in the installer package, to be extracted to a temp folder, and then have the absolute path in replacements.
      */
 
-    /*
-     * SIDE           - 'client'                       | 'server'
-     * MINECRAFT_JAR  - [versions/1.5.2/1.5.2.jar]     | [minecraft_server.1.5.2.jar]
-     * TARGET_JAR     - [versions/1.5.2-#/1.5.2-#.jar] | [forge-1.5.2-#.jar]
-     * BASE_DIRECTORY -
-     */
+    private void transform_1_7_or_1_6(CommonContext context, JsonNodeFactory factory) throws IOException {
+        INSTALLER_TOOLS.injectLibraries(libraries, context.config(), factory);
+        Processor.inject(ArtifactKey.of(Maven.FORGE, "net.minecraftforge.lex:legacyjavafixer:1.0"), libraries, context.config(), factory);
+
+        List<ProcessorStep> steps = List.of(
+            // Both: Copy LegacyJavaFixer to Mods folder
+            ProcessorStep.both(
+                INSTALLER_TOOLS,
+                "--task", "COPY",
+                "--input", "[net.minecraftforge.lex:legacyjavafixer:1.0]",
+                "--output", "|mods/legacyjavafixer-1.0.jar|"
+            )
+        );
+
+        steps.forEach(step -> processors.add(step.toNode(factory)));
+    }
 
 }
