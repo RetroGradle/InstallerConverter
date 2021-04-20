@@ -8,7 +8,6 @@ version = '0.1'
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
@@ -26,7 +25,6 @@ dependencies {
 
 application {
     mainClassName = 'uk.gemwire.installerconverter.Main'
-    applicationDefaultJvmArgs += ["--enable-preview"]
 }
 
 
@@ -37,30 +35,34 @@ run {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(15)
+        languageVersion = JavaLanguageVersion.of(16)
     }
 }
 
-// Enable preview features, so we can have records and such
+jar.configure {
+    manifest {
+        attributes([
+                "Add-Exports": "java.base/sun.security.tools=ALL-UNNAMED " +
+                        "jdk.jartool/sun.security.tools.jarsigner=ALL-UNNAMED " +
+                        "java.base/sun.security.util=ALL-UNNAMED " +
+                        "java.base/sun.security.x509=ALL-UNNAMED " +
+                        "java.base/sun.security.pkcs=ALL-UNNAMED " +
+                        "java.base/sun.security.timestamp=ALL-UNNAMED"
+        ] as LinkedHashMap)
+    }
+}
 
 tasks.withType(JavaCompile) {
-    options.compilerArgs += '--enable-preview'
     options.compilerArgs.addAll([
             "--add-exports", "java.base/sun.security.tools=ALL-UNNAMED",
             "--add-exports", "jdk.jartool/sun.security.tools.jarsigner=ALL-UNNAMED",
             "--add-exports", "java.base/sun.security.util=ALL-UNNAMED",
-            "--add-exports", "java.base/sun.security.x509=ALL-UNNAMED"
+            "--add-exports", "java.base/sun.security.x509=ALL-UNNAMED",
+            "--add-exports", "java.base/sun.security.pkcs=ALL-UNNAMED",
+            "--add-exports", "java.base/sun.security.timestamp=ALL-UNNAMED"
     ])
-    sourceCompatibility = 15;
+    sourceCompatibility = 16;
     options.release = null;
-}
-
-tasks.withType(Test) {
-    jvmArgs += "--enable-preview"
-}
-
-tasks.withType(JavaExec) {
-    jvmArgs += "--enable-preview"
 }
 
 test {
