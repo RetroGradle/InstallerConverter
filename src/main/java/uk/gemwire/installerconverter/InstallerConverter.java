@@ -44,79 +44,78 @@ public class InstallerConverter {
         LOGGER.info("Converting Installer for version " + version); //TODO: Convert Version
 
         // The main in-memory FileSystem (Jimfs)
-        FileSystem inMemFS = Jimfs.newFileSystem("installerconverter", Configuration.unix());
+        try (FileSystem inMemFS = Jimfs.newFileSystem("installerconverter", Configuration.unix())) {
+            // Copy the Installer to memory
+            LOGGER.info(" - Copying installer JAR to memory");
+            Path inMemInstaller = inMemFS.getPath(inputInstaller.getFileName().toString());
+            Files.copy(inputInstaller, inMemInstaller);
 
-        // Copy the Installer to memory
-        LOGGER.info(" - Copying installer JAR to memory");
-        Path inMemInstaller = inMemFS.getPath(inputInstaller.getFileName().toString());
-        Files.copy(inputInstaller, inMemInstaller);
+            // Get Installer Base (downloaded and/or cached)
+            LOGGER.info(" - Retrieving base installer");
+            Path installerBase = Installers.provide(config);
 
-        // Get Installer Base (downloaded and/or cached)
-        LOGGER.info(" - Retrieving base installer");
-        Path installerBase = Installers.provide(config);
+            // Get the path to the in-memory output jar
+            LOGGER.info(" - Copying base installer to memory");
+            Path memoryOutputJar = inMemFS.getPath("output.jar");
+            Files.copy(installerBase, memoryOutputJar);
 
-        // Get the path to the in-memory output jar
-        LOGGER.info(" - Copying base installer to memory");
-        Path memoryOutputJar = inMemFS.getPath("output.jar");
-        Files.copy(installerBase, memoryOutputJar);
+            // Open up the two jars (Installer and the output) in-memory
+            LOGGER.info(" - Loading in-memory input installer and output jars");
+            try (FileSystem installer = newFileSystem(inMemInstaller);
+                 FileSystem output = newFileSystem(memoryOutputJar)) {
 
-        // Open up the two jars (Installer and the output) in-memory
-        LOGGER.info(" - Loading in-memory input installer and output jars");
-        try (FileSystem installer = newFileSystem(inMemInstaller);
-             FileSystem output = newFileSystem(memoryOutputJar)) {
-
-            // Validate the Base Installer is not already in the new format
-            if (Files.exists(installer.getPath("maven"))) {
-                LOGGER.info("Installer is already version 2.0, skipping...");
-                return;
-            }
-
-            // Copy `forge-{version}-universal.jar` to `maven/net/minecraftforge/forge/{version}/forge-{version}.jar`
-            LOGGER.info(" - Copying universal jar");
-            Files.createDirectories(output.getPath("maven/net/minecraftforge/forge/{version}".replace("{version}", version)));
-            try {
-                Files.copy(installer.getPath("forge-{version}-universal.jar".replace("{version}", version)), output.getPath("maven/net/minecraftforge/forge/{version}/forge-{version}.jar".replace("{version}", version)));
-            } catch (IOException exception) {
-                List<String> jars = Files.list(installer.getPath("/")).map(Path::getFileName).filter(JAR_MATCHER::matches).map(Path::toString).filter(UNIVERSAL_FORGE).collect(Collectors.toList());
-
-                if (jars.size() != 1) throw new IllegalStateException("Could not identify Universal Jar for version " + version);
-
-                Files.copy(installer.getPath(jars.get(0)), output.getPath("maven/net/minecraftforge/forge/{version}/forge-{version}.jar".replace("{version}", version)));
-            }
-
-            // Convert `install_profile.json` -> `install_profile.json` & `version.json`
-            LOGGER.info(" - Converting install profile");
-            convertProfile(
-                config.withAdditionalLocalMaven(output.getPath("maven/")),
-                installer.getPath("install_profile.json"),
-                output.getPath("install_profile.json"),
-                output.getPath("version.json")
-            );
-
-            // Optionally Copy Big Logo
-            if (config.overrideBigLogo()) {
-                LOGGER.info(" - Copying big_logo.png");
-                copy(installer, output, "big_logo.png");
-            }
-
-            // Copy Files
-            LOGGER.info(" - Copying other files");
-            for (String file : Files.list(installer.getPath("/")).map(Path::getFileName).filter(TXT_MATCHER::matches).map(Path::toString).collect(Collectors.toList())) {
-                if (file.toLowerCase(Locale.ROOT).endsWith("changelog.txt")) {
-                    LOGGER.info("   - Skipping {}", file);
-                    continue;
+                // Validate the Base Installer is not already in the new format
+                if (Files.exists(installer.getPath("maven"))) {
+                    LOGGER.info("Installer is already version 2.0, skipping...");
+                    return;
                 }
 
-                LOGGER.info("   - Copying {}", file);
-                copy(installer, output, file);
+                // Copy `forge-{version}-universal.jar` to `maven/net/minecraftforge/forge/{version}/forge-{version}.jar`
+                LOGGER.info(" - Copying universal jar");
+                Files.createDirectories(output.getPath("maven/net/minecraftforge/forge/{version}".replace("{version}", version)));
+                try {
+                    Files.copy(installer.getPath("forge-{version}-universal.jar".replace("{version}", version)), output.getPath("maven/net/minecraftforge/forge/{version}/forge-{version}.jar".replace("{version}", version)));
+                } catch (IOException exception) {
+                    List<String> jars = Files.list(installer.getPath("/")).map(Path::getFileName).filter(JAR_MATCHER::matches).map(Path::toString).filter(UNIVERSAL_FORGE).collect(Collectors.toList());
+
+                    if (jars.size() != 1) throw new IllegalStateException("Could not identify Universal Jar for version " + version);
+
+                    Files.copy(installer.getPath(jars.get(0)), output.getPath("maven/net/minecraftforge/forge/{version}/forge-{version}.jar".replace("{version}", version)));
+                }
+
+                // Convert `install_profile.json` -> `install_profile.json` & `version.json`
+                LOGGER.info(" - Converting install profile");
+                convertProfile(
+                    config.withAdditionalLocalMaven(output.getPath("maven/")),
+                    installer.getPath("install_profile.json"),
+                    output.getPath("install_profile.json"),
+                    output.getPath("version.json")
+                );
+
+                // Optionally Copy Big Logo
+                if (config.overrideBigLogo()) {
+                    LOGGER.info(" - Copying big_logo.png");
+                    copy(installer, output, "big_logo.png");
+                }
+
+                // Copy Files
+                LOGGER.info(" - Copying other files");
+                for (String file : Files.list(installer.getPath("/")).map(Path::getFileName).filter(TXT_MATCHER::matches).map(Path::toString).collect(Collectors.toList())) {
+                    if (file.toLowerCase(Locale.ROOT).endsWith("changelog.txt")) {
+                        LOGGER.info("   - Skipping {}", file);
+                        continue;
+                    }
+
+                    LOGGER.info("   - Copying {}", file);
+                    copy(installer, output, file);
+                }
             }
+            // (FSs are closed here; important for the output.jar so the contents are written)
+            // Copy the resulting jar
+            LOGGER.info(" - Copying output jar to disk");
+            Files.createDirectories(OUTPUT);
+            Files.copy(memoryOutputJar, OUTPUT.resolve("installer-{version}.jar".replace("{version}", Conversions.convertVersion(version))), StandardCopyOption.REPLACE_EXISTING); //TODO: Location
         }
-        // (FSs are closed here; important for the output.jar so the contents are written)
-        // Copy the resulting jar
-        LOGGER.info(" - Copying output jar to disk");
-        Files.createDirectories(OUTPUT);
-        Files.copy(memoryOutputJar, OUTPUT.resolve("installer-{version}.jar".replace("{version}", Conversions.convertVersion(version))), StandardCopyOption.REPLACE_EXISTING); //TODO: Location
-        inMemFS.close();
 
         //TODO: The 2.0 Installer Jars should probably be signed
 

@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.util.Jackson;
 import uk.gemwire.installerconverter.util.maven.ArtifactKey;
+import uk.gemwire.installerconverter.v1_5.conversion.Conversions;
 
 /**
  * @author RetroGradle
@@ -37,8 +38,6 @@ public class Main {
             .withCachingResolver();
 
         config.setup();
-        // debugResolve(config, ArtifactKey.of(Maven.FORGE, "net.minecraftforge.lex:legacyjavafixer:1.0"));
-        //debugResolve(config, ArtifactKey.of("org.bouncycastle:bcprov-jdk15on:1.47"));
 
         /* Testing Versions
         .cache\local\net\minecraftforge\forge\1.10.2-12.18.3.2511
@@ -56,16 +55,18 @@ public class Main {
         .cache\local\net\minecraftforge\forge\1.9.4-12.17.0.2051
          */
 
-        Predicate<String> predicate = (value) -> java.util.Objects.equals(value, "1.7.10-10.13.4.1614-1.7.10"); // ""1.6.1-8.9.0.749"); // "1.5.2-7.8.1.738"); // "1.6.4-9.11.1.965"); //
+        Predicate<String> predicate = (value) -> {
+            String versionString = Conversions.convertVersion(value).split("\\.", 3)[1];
+            int version = Integer.parseInt(versionString);
+            return 7 <= version && version <= 12;
+        };
 
         try {
-            //InstallerConverter.convert(config, "1.5.2-7.8.1.738");
-            //InstallerConverter.convert(config, "1.6.4-9.11.1.965");
-            //InstallerConverter.convert(config, "1.7.10-10.13.4.1614-1.7.10");
-            //InstallerConverter.convert(config, "1.12.2-14.23.5.2847");
-
             long startTime = System.nanoTime();
-            List<Path> versions = collectVersions(config).stream().sorted().collect(Collectors.toList()); //TODO: Proper Sort
+            List<Path> versions = collectVersions(config)
+                .stream()
+                .sorted() //TODO: Proper Sort
+                .collect(Collectors.toList());
 
             for (Path path : versions) {
                 String version = getVersion(path);
