@@ -62,7 +62,7 @@ public class LibraryTransformers {
     }
 
     private static ArtifactKey transformForge(String minecraft, ArtifactKey info) {
-        return transform(info, FILTER_MINECRAFTFORGE, (gav) -> new Artifact(gav.group(), "forge", minecraft + "-" + gav.version(), null));
+        return transform(info, FILTER_MINECRAFTFORGE, (gav) -> Artifact.of(gav.group(), "forge", minecraft + "-" + gav.version(), null));
     }
 
     private static ArtifactKey transformAsm(String minecraft, ArtifactKey info) {

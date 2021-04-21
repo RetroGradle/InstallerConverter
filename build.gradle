@@ -39,30 +39,8 @@ java {
     }
 }
 
-jar.configure {
-    manifest {
-        attributes([
-                "Add-Exports": "java.base/sun.security.tools=ALL-UNNAMED " +
-                        "jdk.jartool/sun.security.tools.jarsigner=ALL-UNNAMED " +
-                        "java.base/sun.security.util=ALL-UNNAMED " +
-                        "java.base/sun.security.x509=ALL-UNNAMED " +
-                        "java.base/sun.security.pkcs=ALL-UNNAMED " +
-                        "java.base/sun.security.timestamp=ALL-UNNAMED"
-        ] as LinkedHashMap)
-    }
-}
-
 tasks.withType(JavaCompile) {
-    options.compilerArgs.addAll([
-            "--add-exports", "java.base/sun.security.tools=ALL-UNNAMED",
-            "--add-exports", "jdk.jartool/sun.security.tools.jarsigner=ALL-UNNAMED",
-            "--add-exports", "java.base/sun.security.util=ALL-UNNAMED",
-            "--add-exports", "java.base/sun.security.x509=ALL-UNNAMED",
-            "--add-exports", "java.base/sun.security.pkcs=ALL-UNNAMED",
-            "--add-exports", "java.base/sun.security.timestamp=ALL-UNNAMED"
-    ])
-    sourceCompatibility = 16;
-    options.release = null;
+    sourceCompatibility = 16
 }
 
 test {

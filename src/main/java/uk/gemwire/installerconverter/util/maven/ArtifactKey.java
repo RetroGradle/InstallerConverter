@@ -1,18 +1,36 @@
 package uk.gemwire.installerconverter.util.maven;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.MoreObjects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.v1_5.LibraryInfo;
 import uk.gemwire.installerconverter.v1_5.conversion.IConvertable;
 
-public record ArtifactKey(String host, Artifact artifact) implements IConvertable<ObjectNode, Config> {
+public class ArtifactKey implements IConvertable<ObjectNode, Config> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArtifactKey.class);
+
+    private final String host;
+    private final Artifact artifact;
+
+    public ArtifactKey(String host, Artifact artifact) {
+        this.host = host;
+        this.artifact = artifact;
+    }
+
+    public String host() {
+        return host;
+    }
+
+    public Artifact artifact() {
+        return artifact;
+    }
 
     //==================================================================================================================
 
@@ -72,4 +90,26 @@ public record ArtifactKey(String host, Artifact artifact) implements IConvertabl
         return node;
     }
 
+    //==================================================================================================================
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ArtifactKey that = (ArtifactKey) o;
+        return Objects.equals(host, that.host) && Objects.equals(artifact, that.artifact);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(host, artifact);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+            .add("host", host)
+            .add("artifact", artifact)
+            .toString();
+    }
 }

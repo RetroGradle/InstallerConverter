@@ -20,8 +20,12 @@ public abstract class Maven {
     public static InputStream download(URL url) throws IOException {
         URLConnection connection = makeConnection(url);
 
-        if (connection instanceof HttpURLConnection httpConn && (httpConn.getResponseCode() < 200 || httpConn.getResponseCode() >= 300))
-            throw new IOException("Couldn't connect to server (responded with %s)".formatted(httpConn.getResponseCode()));
+        if (connection instanceof HttpURLConnection) {
+            HttpURLConnection httpConn = (HttpURLConnection) connection;
+
+            if (httpConn.getResponseCode() < 200 || httpConn.getResponseCode() >= 300)
+                throw new IOException("Couldn't connect to server (responded with %s)".formatted(httpConn.getResponseCode()));
+        }
 
         return connection.getInputStream();
     }
