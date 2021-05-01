@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.util.Installers;
 import uk.gemwire.installerconverter.util.Jackson;
 import uk.gemwire.installerconverter.util.maven.Artifact;
+import uk.gemwire.installerconverter.util.signing.JarSignerInterop;
 import uk.gemwire.installerconverter.v1_5.InstallProfile;
 import uk.gemwire.installerconverter.v1_5.conversion.Conversions;
 import uk.gemwire.installerconverter.v1_5.conversion.Converted;
@@ -112,12 +113,16 @@ public class InstallerConverter {
             }
             // (FSs are closed here; important for the output.jar so the contents are written)
             // Copy the resulting jar
-            LOGGER.info(" - Copying output jar to disk");
             Files.createDirectories(OUTPUT);
-            Files.copy(memoryOutputJar, OUTPUT.resolve("installer-{version}.jar".replace("{version}", Conversions.convertVersion(version))), StandardCopyOption.REPLACE_EXISTING); //TODO: Location
+            Path output = OUTPUT.resolve("installer-{version}.jar".replace("{version}", Conversions.convertVersion(version))); //TODO: Location
+            if (config.signingConfig() == null) {
+                LOGGER.info(" - Copying output jar to disk");
+                Files.copy(memoryOutputJar, output, StandardCopyOption.REPLACE_EXISTING);
+            } else {
+                LOGGER.info(" - Copying and Signing output jar to disk");
+                JarSignerInterop.sign(config.signingConfig(), memoryOutputJar, output);
+            }
         }
-
-        //TODO: The 2.0 Installer Jars should probably be signed
 
         LOGGER.info("Conversion of Installer for version {} is complete.", version);
     }

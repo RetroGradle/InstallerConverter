@@ -35,7 +35,12 @@ public class Main {
     public static void main(String... args) throws IOException {
         Config config = Config //TODO: WIRING
             .withDefaults()
-            .withCachingResolver();
+            .withCachingResolver()
+            //.transformSigningConfig(it -> it
+            //    .withStorePass("keystorepass")
+            //)
+            .withSigningConfig(null)
+            ;
 
         config.setup();
 
