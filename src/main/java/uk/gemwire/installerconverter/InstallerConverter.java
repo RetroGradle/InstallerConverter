@@ -110,7 +110,7 @@ public class InstallerConverter {
             }
             // (FSs are closed here; important for the output.jar so the contents are written)
             // Copy the resulting jar
-            Path output = config.output().resolve("{version}/installer-{version}.jar".replace("{version}", Conversions.convertVersion(version)));
+            Path output = config.output().resolve("{version}/forge-{version}-installer.jar".replace("{version}", Conversions.convertVersion(version)));
             Files.createDirectories(output.getParent());
 
             if (config.signingConfig() == null) {

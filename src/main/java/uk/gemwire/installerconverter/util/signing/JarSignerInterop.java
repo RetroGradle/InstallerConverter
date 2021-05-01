@@ -11,8 +11,6 @@ public class JarSignerInterop {
         sign(config.keystore(), config.storepass(), config.keypass(), config.alias(), input, output);
     }
 
-    //TODO: Actually implement the logic this uses here so we don't have to do this reflection
-    /** @see sun.security.tools.jarsigner.Main */
     public static void sign(Path keystore, String storepass, String keypass, String alias, Path input, Path output) throws IOException {
         if (Files.exists(output)) Files.delete(output);
 
@@ -48,6 +46,8 @@ public class JarSignerInterop {
         }
     }
 
+    //TODO: Actually implement the logic this uses here so we don't have to do this reflection
+    /** @see sun.security.tools.jarsigner.Main */
     private static void sign(String... args) throws IOException {
         try {
             Class.forName("sun.security.tools.jarsigner.Main").getDeclaredMethod("main", String[].class).invoke(null, (Object) args);
