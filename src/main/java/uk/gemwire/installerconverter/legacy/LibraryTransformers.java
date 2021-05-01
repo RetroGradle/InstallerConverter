@@ -38,8 +38,8 @@ public class LibraryTransformers {
         TRANSFORMERS.add(LibraryTransformers::transformAsm);
         TRANSFORMERS.add(LibraryTransformers::transformGuava14);
         TRANSFORMERS.add(LibraryTransformers::transformBouncy);
-        TRANSFORMERS.add(LibraryTransformers::transformLegacyFixer);
-        TRANSFORMERS.add(LibraryTransformers::transformScalaCustom);
+        //TRANSFORMERS.add(LibraryTransformers::transformLegacyFixer);
+        //TRANSFORMERS.add(LibraryTransformers::transformScalaCustom);
     }
 
     public static ArtifactKey execute(String minecraft, ArtifactKey key) {
