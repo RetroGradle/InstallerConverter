@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.maven.Artifact;
+import uk.gemwire.installerconverter.util.maven.Maven;
 
 public class Installers {
     private static final Logger LOGGER = LoggerFactory.getLogger(Installers.class);
@@ -25,7 +26,8 @@ public class Installers {
 
     private static void download(Config config, Artifact artifact, Path destination) throws IOException {
         LOGGER.info("Downloading installer {} from {} to {}...", artifact, config.baseMaven() + artifact.asPath(), destination);
-        try (InputStream in = new URL(config.baseMaven() + artifact.asPath()).openStream()) {
+        //TODO: MIGRATE TO AN OFFICIAL FORGE BUILD
+        try (InputStream in = new URL(Maven.ATERANIMAVIS + artifact.asPath()).openStream()) {
             Files.copy(in, destination, StandardCopyOption.REPLACE_EXISTING);
         }
         LOGGER.info("Downloaded installer!");

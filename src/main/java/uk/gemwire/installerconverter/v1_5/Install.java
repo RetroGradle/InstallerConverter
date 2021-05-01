@@ -2,6 +2,7 @@ package uk.gemwire.installerconverter.v1_5;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
@@ -15,6 +16,7 @@ import uk.gemwire.installerconverter.util.maven.Maven;
 import uk.gemwire.installerconverter.v1_5.conversion.CommonContext;
 import uk.gemwire.installerconverter.v1_5.conversion.Conversions;
 import uk.gemwire.installerconverter.v1_5.conversion.IConvertable;
+import uk.gemwire.installerconverter.v1_5.processor.DataFile;
 import uk.gemwire.installerconverter.v1_5.processor.Processor;
 import uk.gemwire.installerconverter.v1_5.processor.ProcessorStep;
 
@@ -187,7 +189,21 @@ public final class Install implements IConvertable<ObjectNode, CommonContext> {
         return node;
     }
 
-    private static final Processor INSTALLER_TOOLS = Processor.of(Maven.FORGE, "net.minecraftforge:installertools:1.2.1");
+    //TODO: MIGRATE TO AN OFFICIAL FORGE BUILD
+    private static final Processor INSTALLER_TOOLS = Processor.of(Maven.ATERANIMAVIS,
+        "net.minecraftforge:installertools:1.2.1-local",
+        ArtifactKey.of(Maven.FORGE, "com.google.code.gson:gson:2.8.6"),
+        ArtifactKey.of(Maven.FORGE, "com.google.guava:guava:20.0"),
+        ArtifactKey.of(Maven.FORGE, "de.siegmar:fastcsv:2.0.0"),
+        ArtifactKey.of(Maven.FORGE, "net.md-5:SpecialSource:1.8.5"),
+        ArtifactKey.of(Maven.FORGE, "net.minecraftforge:srgutils:0.4.1"),
+        ArtifactKey.of(Maven.FORGE, "net.sf.jopt-simple:jopt-simple:5.0.4"),
+        ArtifactKey.of(Maven.FORGE, "net.sf.opencsv:opencsv:2.3"),
+        ArtifactKey.of(Maven.FORGE, "org.ow2.asm:asm:6.1.1"),
+        ArtifactKey.of(Maven.FORGE, "org.ow2.asm:asm-analysis:6.1.1"),
+        ArtifactKey.of(Maven.FORGE, "org.ow2.asm:asm-commons:6.1.1"),
+        ArtifactKey.of(Maven.FORGE, "org.ow2.asm:asm-tree:6.1.1")
+    );
 
     /*
      * Can be in the following formats:
@@ -198,15 +214,20 @@ public final class Install implements IConvertable<ObjectNode, CommonContext> {
 
     private void transform_1_7_or_1_6(CommonContext context, JsonNodeFactory factory) throws IOException {
         INSTALLER_TOOLS.injectLibraries(libraries, context.config(), factory);
-        Processor.inject(ArtifactKey.of(Maven.FORGE, "net.minecraftforge.lex:legacyjavafixer:1.0"), libraries, context.config(), factory);
+        ArtifactKey LEGACY_JAVA_FIXER = ArtifactKey.of(Maven.FORGE, "net.minecraftforge.lex:legacyjavafixer:1.0");
+        Processor.inject(LEGACY_JAVA_FIXER, libraries, context.config(), factory);
+
+        DataFile.inject(data, "LEGACYJAVAFIXER", "|mods/legacyjavafixer-1.0.jar|");
+        DataFile.injectSha1(data, "LEGACYJAVAFIXER_HASH", LEGACY_JAVA_FIXER, context.config().resolver());
 
         List<ProcessorStep> steps = List.of(
             // Both: Copy LegacyJavaFixer to Mods folder
             ProcessorStep.both(
                 INSTALLER_TOOLS,
+                Map.of("{LEGACYJAVAFIXER}", "{LEGACYJAVAFIXER_HASH}"),
                 "--task", "COPY",
                 "--input", "[net.minecraftforge.lex:legacyjavafixer:1.0]",
-                "--output", "|mods/legacyjavafixer-1.0.jar|"
+                "--output", "{LEGACYJAVAFIXER}"
             )
         );
 

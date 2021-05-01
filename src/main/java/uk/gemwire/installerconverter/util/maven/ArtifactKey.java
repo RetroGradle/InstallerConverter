@@ -78,7 +78,7 @@ public class ArtifactKey implements IConvertable<ObjectNode, Config> {
         ObjectNode node = factory.objectNode();
         node.put("path", path);
 
-        CachedArtifactInfo data = config.resolver().resolve(host, artifact);
+        CachedArtifactInfo data = config.resolver().resolve(this);
 
         if (data == null)
             throw new IOException(String.format("Couldn't get Sha1 or Size for '%s' from '%s'", artifact.asStringWithClassifier(), host));

@@ -62,9 +62,9 @@ public class Config {
         return resolver;
     }
 
-    //TODO: .18 for Relative Paths not yet available on forge maven (if it ever will be accepted)
     public static Config withDefaults() {
-        return new Config("2.0.18", false, DEFAULT_ICON, Path.of(".cache/local"), Maven.FORGE, new RemoteResolver(null));
+        //TODO: MIGRATE TO AN OFFICIAL FORGE BUILD
+        return new Config("2.0.18-local", false, DEFAULT_ICON, Path.of(".cache/local"), Maven.FORGE, new RemoteResolver(null));
     }
 
     public Config withAdditionalLocalMaven(Path memoryMaven) {

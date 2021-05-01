@@ -4,9 +4,11 @@ import java.util.Objects;
 import javax.annotation.Nullable;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.util.StdConverter;
 
-@JsonDeserialize(converter = Artifact.Converter.class)
+@JsonSerialize(converter = Artifact.Serializer.class)
+@JsonDeserialize(converter = Artifact.Deserializer.class)
 public class Artifact {
 
     private final String group;
@@ -85,7 +87,14 @@ public class Artifact {
         return asStringWithClassifier();
     }
 
-    public static class Converter extends StdConverter<String, Artifact> {
+    public static class Serializer extends StdConverter<Artifact, String> {
+        @Override
+        public String convert(Artifact value) {
+            return value.asStringWithClassifier();
+        }
+    }
+
+    public static class Deserializer extends StdConverter<String, Artifact> {
         @Override
         public Artifact convert(String value) {
             return Artifact.of(value);
