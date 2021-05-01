@@ -33,6 +33,43 @@ public abstract class Conversions {
         throw new IllegalArgumentException("Invalid version: " + version);
     }
 
+    public static String asComparableVersion(String version) {
+        return asComparable(convertVersion(version));
+    }
+
+    public static String asComparable(String version) {
+        String[] parts = version.split("-", 2);
+        if (parts.length != 2) throw new IllegalArgumentException("Invalid version: " + version);
+
+        String minecraftVersion = asComparableMinecraft(parts[0]);
+        String forgeVersion     = asComparableForge(parts[1]);
+
+        return minecraftVersion + "|" + forgeVersion;
+    }
+
+    private static String asComparableMinecraft(String version) {
+        String[] parts = version.split("\\.", 3);
+        if (parts.length != 3) throw new IllegalArgumentException("Invalid version: " + version);
+
+        int a = Integer.parseInt(parts[0]);
+        int b = Integer.parseInt(parts[1]);
+        int c = Integer.parseInt(parts[2]);
+
+        return String.format("%d", a) + String.format("%02d", b) + String.format("%02d", c);
+    }
+
+    private static String asComparableForge(String version) {
+        String[] parts = version.split("\\.", 4);
+        if (parts.length != 4) throw new IllegalArgumentException("Invalid version: " + version);
+
+        int a = Integer.parseInt(parts[0]);
+        int b = Integer.parseInt(parts[1]);
+        int c = Integer.parseInt(parts[2]);
+        int d = Integer.parseInt(parts[3]);
+
+        return String.format("%02d", a) + String.format("%02d", b) + String.format("%02d", c) + String.format("%04d", d);
+    }
+
     public static ArrayNode createCommentNode(JsonNodeFactory factory) {
         ArrayNode node = factory.arrayNode();
         node.add("Please do not automate the download and installation of Forge.");
