@@ -35,12 +35,12 @@ run {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(16)
+        languageVersion = JavaLanguageVersion.of(15)
     }
 }
 
 tasks.withType(JavaCompile) {
-    sourceCompatibility = 16
+    sourceCompatibility = 15
 }
 
 test {
