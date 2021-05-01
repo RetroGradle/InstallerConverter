@@ -11,6 +11,7 @@ import java.nio.file.PathMatcher;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.util.Installers;
 import uk.gemwire.installerconverter.util.Jackson;
-import uk.gemwire.installerconverter.util.maven.Artifact;
+import uk.gemwire.installerconverter.util.common.IOConsumer;
 import uk.gemwire.installerconverter.util.signing.JarSignerInterop;
 import uk.gemwire.installerconverter.v1_5.InstallProfile;
 import uk.gemwire.installerconverter.v1_5.conversion.Conversions;
@@ -35,14 +36,8 @@ public class InstallerConverter {
     private static final PathMatcher JAR_MATCHER = FileSystems.getDefault().getPathMatcher("glob:*.jar");
     private static final Predicate<String> UNIVERSAL_FORGE = (value) -> value.contains("universal") && value.contains("forge");
 
-    private static final Path OUTPUT = Path.of("installers");
-
-    public static void convert(Config config, String version) throws IOException {
-        convert(config, config.localMaven().resolve(Artifact.of("net.minecraftforge:forge:{version}:installer".replace("{version}", version)).asPath()), version);
-    }
-
-    public static void convert(Config config, Path inputInstaller, String version) throws IOException {
-        LOGGER.info("Converting Installer for version " + version); //TODO: Convert Version
+    public static void convert(Config config, Path baseDir, Path inputInstaller, String version) throws IOException {
+        LOGGER.info("Converting Installer for version " + Conversions.convertVersion(version));
 
         // The main in-memory FileSystem (Jimfs)
         try (FileSystem inMemFS = Jimfs.newFileSystem("installerconverter", Configuration.unix())) {
@@ -70,6 +65,8 @@ public class InstallerConverter {
                     LOGGER.info("Installer is already version 2.0, skipping...");
                     return;
                 }
+
+                //TODO: v Version conversion? v
 
                 // Copy `forge-{version}-universal.jar` to `maven/net/minecraftforge/forge/{version}/forge-{version}.jar`
                 LOGGER.info(" - Copying universal jar");
@@ -113,8 +110,9 @@ public class InstallerConverter {
             }
             // (FSs are closed here; important for the output.jar so the contents are written)
             // Copy the resulting jar
-            Files.createDirectories(OUTPUT);
-            Path output = OUTPUT.resolve("installer-{version}.jar".replace("{version}", Conversions.convertVersion(version))); //TODO: Location
+            Path output = config.output().resolve("{version}/installer-{version}.jar".replace("{version}", Conversions.convertVersion(version)));
+            Files.createDirectories(output.getParent());
+
             if (config.signingConfig() == null) {
                 LOGGER.info(" - Copying output jar to disk");
                 Files.copy(memoryOutputJar, output, StandardCopyOption.REPLACE_EXISTING);
@@ -122,9 +120,40 @@ public class InstallerConverter {
                 LOGGER.info(" - Copying and Signing output jar to disk");
                 JarSignerInterop.sign(config.signingConfig(), memoryOutputJar, output);
             }
+
+            // TODO: Redesign this? Where do we want the backups and how, what do we want to delete, etc
+
+            // We do this in two parts so that the ZipFile can be saved
+            LOGGER.info(" - Backing up old installer");
+            Path inMemBackup = inMemFS.getPath("backup.zip");
+            try (FileSystem backup = newFileSystem(inMemBackup, Map.of("create", true))) {
+                forRemoval(baseDir, (path) -> Files.copy(path, backup.getPath(path.getFileName().toString())));
+            }
+
+            Path backup = config.output().resolve("backups/backup-{version}.zip".replace("{version}", Conversions.convertVersion(version)));
+            Files.createDirectories(backup.getParent());
+            Files.copy(inMemBackup, backup);
+
+            LOGGER.info(" - Removing old installer");
+            forRemoval(baseDir, (path) -> LOGGER.info("FAKE DELETE {}", path)); //TODO: Files::delete
         }
 
         LOGGER.info("Conversion of Installer for version {} is complete.", version);
+    }
+
+    /**
+     * Basically filters for -installer.jar and -installer-win.jar
+     */
+    public static void forRemoval(Path baseDir, IOConsumer<Path> consumer) throws IOException {
+        //TODO: Cleanup
+        List<Path> paths = Files
+            .walk(baseDir)
+            .filter(path -> !Files.isDirectory(path))
+            .filter(path -> path.toString().replace("-win.exe", ".jar").endsWith("-installer.jar"))
+            .collect(Collectors.toList());
+
+        for (Path path : paths)
+            consumer.accept(path);
     }
 
     private static void copy(FileSystem input, FileSystem output, String path) throws IOException {

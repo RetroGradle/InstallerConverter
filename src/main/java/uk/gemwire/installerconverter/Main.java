@@ -36,6 +36,7 @@ public class Main {
         Config config = Config //TODO: WIRING
             .withDefaults()
             .withCachingResolver()
+            .withOutput(Path.of("installers"))
             //.transformSigningConfig(it -> it
             //    .withStorePass("keystorepass")
             //)
@@ -82,8 +83,9 @@ public class Main {
                 try {
                     LOGGER.info(version + " installer=" + hasInstaller(path) + " zip=" + hasUniversalZip(path) + " jar=" + hasUniversalJar(path));
 
-                    if (hasInstaller(path)) {
-                        InstallerConverter.convert(config, asInstaller(path), version);
+                    Path installer = asInstaller(path);
+                    if (Files.exists(installer)) {
+                        InstallerConverter.convert(config, path, installer, version);
                         continue;
                     }
 

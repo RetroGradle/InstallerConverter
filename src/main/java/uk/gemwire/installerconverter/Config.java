@@ -28,15 +28,17 @@ public class Config {
     private final String icon;
     private final Path localMaven;
     private final String baseMaven;
+    private final Path output;
     private final SigningConfig signingConfig;
     private final IResolver resolver;
 
-    public Config(String installerVersion, boolean overrideBigLogo, String icon, Path localMaven, String baseMaven, SigningConfig signingConfig, IResolver resolver) {
+    public Config(String installerVersion, boolean overrideBigLogo, String icon, Path localMaven, String baseMaven, Path output, SigningConfig signingConfig, IResolver resolver) {
         this.installerVersion = installerVersion;
         this.overrideBigLogo = overrideBigLogo;
         this.icon = icon;
         this.localMaven = localMaven;
         this.baseMaven = baseMaven;
+        this.output = output;
         this.signingConfig = signingConfig;
         this.resolver = resolver;
     }
@@ -61,6 +63,10 @@ public class Config {
         return baseMaven;
     }
 
+    public Path output() {
+        return output;
+    }
+
     public SigningConfig signingConfig() {
         return signingConfig;
     }
@@ -76,6 +82,7 @@ public class Config {
             DEFAULT_ICON,
             Path.of(".cache/local"),
             Maven.FORGE,
+            Path.of("output"),
             SigningConfig.withDefaults(),
             new RemoteResolver(null)
         );
@@ -93,39 +100,43 @@ public class Config {
     }
 
     public Config withInstaller(String installerVersion) {
-        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, signingConfig, resolver);
+        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, output, signingConfig, resolver);
     }
 
     public Config withOverrideBigLogo(boolean overrideBigLogo) {
-        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, signingConfig, resolver);
+        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, output, signingConfig, resolver);
     }
 
     public Config withIcon(String icon) {
-        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, signingConfig, resolver);
+        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, output, signingConfig, resolver);
     }
 
     public Config withLocalMaven(Path localMaven) {
-        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, signingConfig, resolver);
+        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, output, signingConfig, resolver);
     }
 
     public Config withBaseMaven(String baseMaven) {
-        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, signingConfig, resolver);
+        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, output, signingConfig, resolver);
+    }
+
+    public Config withOutput(Path output) {
+        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, output, signingConfig, resolver);
     }
 
     public Config transformSigningConfig(Function<SigningConfig, SigningConfig> transformer) {
-        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, transformer.apply(signingConfig), resolver);
+        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, output, transformer.apply(signingConfig), resolver);
     }
 
     public Config withSigningConfig(SigningConfig signingConfig) {
-        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, signingConfig, resolver);
+        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, output, signingConfig, resolver);
     }
 
     public Config transformResolver(Function<IResolver, IResolver> transformer) {
-        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, signingConfig, transformer.apply(resolver));
+        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, output, signingConfig, transformer.apply(resolver));
     }
 
     public Config withResolver(IResolver resolver) {
-        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, signingConfig, resolver);
+        return new Config(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, output, signingConfig, resolver);
     }
 
     public Config setup() throws IOException {
@@ -151,13 +162,13 @@ public class Config {
         Config config = (Config) o;
         return overrideBigLogo == config.overrideBigLogo && Objects.equals(installerVersion, config.installerVersion)
             && Objects.equals(icon, config.icon) && Objects.equals(localMaven, config.localMaven)
-            && Objects.equals(baseMaven, config.baseMaven) && Objects.equals(signingConfig, config.signingConfig)
-            && Objects.equals(resolver, config.resolver);
+            && Objects.equals(baseMaven, config.baseMaven) && Objects.equals(output, config.output)
+            && Objects.equals(signingConfig, config.signingConfig) && Objects.equals(resolver, config.resolver);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, signingConfig, resolver);
+        return Objects.hash(installerVersion, overrideBigLogo, icon, localMaven, baseMaven, output, signingConfig, resolver);
     }
 
     @Override
@@ -168,6 +179,7 @@ public class Config {
             .add("icon", icon)
             .add("localMaven", localMaven)
             .add("baseMaven", baseMaven)
+            .add("output", output)
             .add("signingConfig", signingConfig)
             .add("resolver", resolver)
             .toString();
