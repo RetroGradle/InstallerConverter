@@ -70,17 +70,17 @@ public class InstallerConverter {
 
                 //TODO: v Version conversion? v
 
-                // Copy `forge-{version}-universal.jar` to `maven/net/minecraftforge/forge/{standardizedVersion}/forge-{standardizedVersion}.jar`
+                // Copy `forge-{version}-universal.jar` to `maven/net/minecraftforge/forge/{version}/forge-{version}.jar`
                 LOGGER.info(" - Copying universal jar");
-                Files.createDirectories(output.getPath("maven/net/minecraftforge/forge/{version}".replace("{version}", standardizedVersion)));
+                Files.createDirectories(output.getPath("maven/net/minecraftforge/forge/{version}".replace("{version}", version)));
                 try {
-                    Files.copy(installer.getPath("forge-{version}-universal.jar".replace("{version}", version)), output.getPath("maven/net/minecraftforge/forge/{version}/forge-{version}.jar".replace("{version}", standardizedVersion)));
+                    Files.copy(installer.getPath("forge-{version}-universal.jar".replace("{version}", version)), output.getPath("maven/net/minecraftforge/forge/{version}/forge-{version}.jar".replace("{version}", version)));
                 } catch (IOException exception) {
                     List<String> jars = Files.list(installer.getPath("/")).map(Path::getFileName).filter(JAR_MATCHER::matches).map(Path::toString).filter(UNIVERSAL_FORGE).collect(Collectors.toList());
 
                     if (jars.size() != 1) throw new IllegalStateException("Could not identify Universal Jar for version " + version);
 
-                    Files.copy(installer.getPath(jars.get(0)), output.getPath("maven/net/minecraftforge/forge/{version}/forge-{version}.jar".replace("{version}", standardizedVersion)));
+                    Files.copy(installer.getPath(jars.get(0)), output.getPath("maven/net/minecraftforge/forge/{version}/forge-{version}.jar".replace("{version}", version)));
                 }
 
                 // Convert `install_profile.json` -> `install_profile.json` & `version.json`
@@ -112,7 +112,7 @@ public class InstallerConverter {
             }
             // (FSs are closed here; important for the output.jar so the contents are written)
             // Copy the resulting jar
-            Path output = config.output().resolve("{version}/forge-{version}-installer.jar".replace("{version}", standardizedVersion));
+            Path output = config.output().resolve("{version}/forge-{version}-installer.jar".replace("{version}", version));
             Files.createDirectories(output.getParent());
 
             if (config.signingConfig() == null) {
@@ -132,7 +132,7 @@ public class InstallerConverter {
                 forRemoval(baseDir, (path) -> Files.copy(path, backup.getPath(path.getFileName().toString())));
             }
 
-            Path backup = config.output().resolve("backups/backup-{version}.zip".replace("{version}", standardizedVersion));
+            Path backup = config.output().resolve("backups/backup-{version}.zip".replace("{version}", version));
             Files.createDirectories(backup.getParent());
 
             if (Files.exists(backup)) Files.delete(backup);
