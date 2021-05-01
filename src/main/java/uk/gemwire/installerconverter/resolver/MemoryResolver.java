@@ -17,7 +17,7 @@ import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 
 public class MemoryResolver extends AbstractResolver {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MemoryResolver.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger("MemoryResolver");
 
     private final Path localRoot;
 
@@ -42,7 +42,7 @@ public class MemoryResolver extends AbstractResolver {
             // Otherwise calculate from Local
             CachedArtifactInfo fromLocal = Hashing.calculateSHA1andSize(stream, "");
 
-            LOGGER.warn("Using local copy of artifact {} from host {}", artifact, host);
+            LOGGER.trace("Using local copy of artifact {} from host {}", artifact, host);
             return fromLocal;
         }
     }

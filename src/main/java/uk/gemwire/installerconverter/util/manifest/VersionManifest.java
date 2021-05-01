@@ -22,14 +22,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.util.Caching;
 import uk.gemwire.installerconverter.util.IO;
-import uk.gemwire.installerconverter.util.Installers;
 import uk.gemwire.installerconverter.util.Jackson;
 import uk.gemwire.installerconverter.util.common.Lazy;
 import uk.gemwire.installerconverter.util.maven.Maven;
 
 public abstract class VersionManifest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Installers.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger("VersionManifest");
     private static final String VERSION_MANIFEST = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
     private static final String VERSION_MANIFEST_V2 = "https://launchermeta.mojang.com/mc/game/version_manifest_v2.json";
 

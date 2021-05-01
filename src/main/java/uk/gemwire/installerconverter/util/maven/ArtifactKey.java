@@ -14,7 +14,7 @@ import uk.gemwire.installerconverter.v1_5.conversion.IConvertable;
 
 public class ArtifactKey implements IConvertable<ObjectNode, Config> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ArtifactKey.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger("ArtifactKey");
 
     private final String host;
     private final Artifact artifact;

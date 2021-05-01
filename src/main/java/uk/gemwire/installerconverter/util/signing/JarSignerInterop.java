@@ -40,7 +40,6 @@ public class JarSignerInterop {
             );
         }
 
-
         if (temporary != null) {
             Files.delete(temporary);
         }

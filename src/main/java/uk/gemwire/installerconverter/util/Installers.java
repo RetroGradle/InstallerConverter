@@ -14,7 +14,7 @@ import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.Maven;
 
 public class Installers {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Installers.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger("Installers");
 
     public static Path provide(Config config) {
         Artifact installer = Artifact.of("net.minecraftforge:installer:{version}:shrunk".replace("{version}", config.installerVersion()));

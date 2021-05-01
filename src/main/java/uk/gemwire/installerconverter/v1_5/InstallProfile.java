@@ -16,7 +16,7 @@ import uk.gemwire.installerconverter.v1_5.conversion.IConvertable;
 
 public final class InstallProfile implements IConvertable<Converted, Config> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InstallProfile.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger("InstallProfile");
 
     private Install install;
     private VersionInfo versionInfo;

@@ -17,7 +17,7 @@ import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 import uk.gemwire.installerconverter.util.maven.Maven;
 
 public class LocalResolver extends AbstractResolver {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LocalResolver.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger("LocalResolver");
 
     private final Path localRoot;
 
@@ -42,7 +42,7 @@ public class LocalResolver extends AbstractResolver {
             CachedArtifactInfo fromLocal = Hashing.calculateSHA1andSize(stream, host + path);
 
             if (artifact.group().startsWith("uk.gemwire")) {
-                LOGGER.warn("Using local copy of artifact {} from host {}", artifact, host);
+                LOGGER.trace("Using local copy of artifact {} from host {}", artifact, host);
                 return fromLocal;
             }
 
@@ -62,7 +62,7 @@ public class LocalResolver extends AbstractResolver {
                 LOGGER.warn("Could not resolve remote hash for artifact {} from host {}; assuming local is valid", artifact, host, e);
             }
 
-            LOGGER.warn("Using local copy of artifact {} from host {}", artifact, host);
+            LOGGER.trace("Using local copy of artifact {} from host {}", artifact, host);
             return fromLocal;
         }
     }

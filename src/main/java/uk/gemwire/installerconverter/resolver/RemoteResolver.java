@@ -10,7 +10,7 @@ import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 import uk.gemwire.installerconverter.util.maven.Maven;
 
 public class RemoteResolver extends AbstractResolver {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RemoteResolver.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger("RemoteResolver");
 
     public RemoteResolver(@Nullable IResolver fallback) {
         super(fallback, LOGGER);

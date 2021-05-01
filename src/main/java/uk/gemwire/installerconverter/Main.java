@@ -20,7 +20,7 @@ import uk.gemwire.installerconverter.v1_5.conversion.Conversions;
  */
 public class Main {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger("Main");
 
     /**
      * TODO: Generating from Scratch
@@ -35,15 +35,18 @@ public class Main {
     public static void main(String... args) throws IOException {
         Config config = Config //TODO: WIRING
             .withDefaults()
-            .withCachingResolver()
-            .withOutput(Path.of("installers"))
-            //.transformSigningConfig(it -> it
-            //    .withStorePass("keystorepass")
+            .withLocalMaven(Path.of(".cache/local"))    // Must be configured before withCachingResolver
+            .withCachingResolver()                      // Setups Resolvers so it uses a cache
+            .withOutput(Path.of("installers"))          // Output Location
+            //.transformSigningConfig(it -> it            // Configure Signing Parameters
+            //    .withKeyStore(Path.of("keystore.jks"))  // Path to keystore
+            //    .withStorePass("keystorepass")          // Keystore password
+            //    .withKeyPass("keypass")                 // Key password (Can be skipped or pass in "")
+            //    .withAlias("forge")                     // Default Value can be skipped
             //)
-            .withSigningConfig(null)
-            ;
+            .withSigningConfig(null);                   // Skip Signing by removing the SigningConfig
 
-        config.setup();
+        config.setup(); //
 
         /* Testing Versions
         .cache\local\net\minecraftforge\forge\1.10.2-12.18.3.2511

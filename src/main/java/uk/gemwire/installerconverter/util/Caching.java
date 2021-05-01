@@ -10,7 +10,7 @@ import uk.gemwire.installerconverter.util.common.IOConsumer;
 import uk.gemwire.installerconverter.util.exception.CachingException;
 
 public abstract class Caching {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Caching.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger("Caching");
 
     private static final Path CACHE = Path.of(".cache");
 

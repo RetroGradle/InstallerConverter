@@ -15,7 +15,7 @@ import uk.gemwire.installerconverter.util.maven.ArtifactKey;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 
 public class CachedResolver implements IResolver {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CachedResolver.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger("CachedResolver");
 
     private final Map<ArtifactKey, CachedArtifactInfo> cache = new HashMap<>();
     private final IResolver fallback;

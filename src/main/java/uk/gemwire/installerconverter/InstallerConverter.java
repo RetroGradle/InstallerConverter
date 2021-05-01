@@ -30,7 +30,7 @@ import uk.gemwire.installerconverter.v1_5.conversion.Converted;
 import static java.nio.file.FileSystems.newFileSystem;
 
 public class InstallerConverter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(InstallerConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger("InstallerConverter");
 
     private static final PathMatcher TXT_MATCHER = FileSystems.getDefault().getPathMatcher("glob:*.txt");
     private static final PathMatcher JAR_MATCHER = FileSystems.getDefault().getPathMatcher("glob:*.jar");
@@ -132,6 +132,8 @@ public class InstallerConverter {
 
             Path backup = config.output().resolve("backups/backup-{version}.zip".replace("{version}", Conversions.convertVersion(version)));
             Files.createDirectories(backup.getParent());
+
+            if (Files.exists(backup)) Files.delete(backup);
             Files.copy(inMemBackup, backup);
 
             LOGGER.info(" - Removing old installer");
