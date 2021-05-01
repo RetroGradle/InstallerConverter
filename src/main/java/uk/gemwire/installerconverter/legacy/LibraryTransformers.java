@@ -11,13 +11,15 @@ import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.ArtifactKey;
 import uk.gemwire.installerconverter.util.maven.Maven;
 import uk.gemwire.installerconverter.v1_5.LibraryInfo;
+import uk.gemwire.installerconverter.v1_5.conversion.Conversions;
 
 public class LibraryTransformers {
     //TODO: CLEANUP + SIMPLIFY
 
     static List<BiFunction<String, ArtifactKey, ArtifactKey>> TRANSFORMERS = new ArrayList<>();
 
-    static Predicate<Artifact> FILTER_MINECRAFTFORGE = filterGroup("net.minecraftforge").and(filterArtifact("minecraftforge"));
+    static Predicate<Artifact> FILTER_MINECRAFTFORGE = filterGroup("net.minecraftforge").and(filterArtifact("forge"));
+    static Predicate<Artifact> FILTER_MINECRAFTFORGE_OLD = filterGroup("net.minecraftforge").and(filterArtifact("minecraftforge"));
 
     static Artifact OBJECT_WEB_ASM_OLD = Artifact.of("org.ow2.asm:asm:4.1-all");
     static Artifact OBJECT_WEB_ASM     = Artifact.of("org.ow2.asm:asm-all:4.1");
@@ -35,6 +37,7 @@ public class LibraryTransformers {
     static {
         TRANSFORMERS.add(LibraryTransformers::transformForgeMaven);
         TRANSFORMERS.add(LibraryTransformers::transformForge);
+        TRANSFORMERS.add(LibraryTransformers::transformOldForge);
         TRANSFORMERS.add(LibraryTransformers::transformAsm);
         TRANSFORMERS.add(LibraryTransformers::transformGuava14);
         TRANSFORMERS.add(LibraryTransformers::transformBouncy);
@@ -62,7 +65,11 @@ public class LibraryTransformers {
     }
 
     private static ArtifactKey transformForge(String minecraft, ArtifactKey info) {
-        return transform(info, FILTER_MINECRAFTFORGE, (gav) -> Artifact.of(gav.group(), "forge", minecraft + "-" + gav.version(), null));
+        return transform(info, FILTER_MINECRAFTFORGE, (gav) -> Artifact.of(gav.group(), "forge", Conversions.convertVersion(gav.version()), null));
+    }
+
+    private static ArtifactKey transformOldForge(String minecraft, ArtifactKey info) {
+        return transform(info, FILTER_MINECRAFTFORGE_OLD, (gav) -> Artifact.of(gav.group(), "forge", minecraft + "-" + gav.version(), null));
     }
 
     private static ArtifactKey transformAsm(String minecraft, ArtifactKey info) {

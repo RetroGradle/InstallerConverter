@@ -37,7 +37,9 @@ public class InstallerConverter {
     private static final Predicate<String> UNIVERSAL_FORGE = (value) -> value.contains("universal") && value.contains("forge");
 
     public static void convert(Config config, Path baseDir, Path inputInstaller, String version) throws IOException {
-        LOGGER.info("Converting Installer for version " + Conversions.convertVersion(version));
+        String standardizedVersion = Conversions.convertVersion(version);
+
+        LOGGER.info("Converting Installer for version " + standardizedVersion);
 
         // The main in-memory FileSystem (Jimfs)
         try (FileSystem inMemFS = Jimfs.newFileSystem("installerconverter", Configuration.unix())) {
@@ -68,17 +70,17 @@ public class InstallerConverter {
 
                 //TODO: v Version conversion? v
 
-                // Copy `forge-{version}-universal.jar` to `maven/net/minecraftforge/forge/{version}/forge-{version}.jar`
+                // Copy `forge-{version}-universal.jar` to `maven/net/minecraftforge/forge/{standardizedVersion}/forge-{standardizedVersion}.jar`
                 LOGGER.info(" - Copying universal jar");
-                Files.createDirectories(output.getPath("maven/net/minecraftforge/forge/{version}".replace("{version}", version)));
+                Files.createDirectories(output.getPath("maven/net/minecraftforge/forge/{version}".replace("{version}", standardizedVersion)));
                 try {
-                    Files.copy(installer.getPath("forge-{version}-universal.jar".replace("{version}", version)), output.getPath("maven/net/minecraftforge/forge/{version}/forge-{version}.jar".replace("{version}", version)));
+                    Files.copy(installer.getPath("forge-{version}-universal.jar".replace("{version}", version)), output.getPath("maven/net/minecraftforge/forge/{version}/forge-{version}.jar".replace("{version}", standardizedVersion)));
                 } catch (IOException exception) {
                     List<String> jars = Files.list(installer.getPath("/")).map(Path::getFileName).filter(JAR_MATCHER::matches).map(Path::toString).filter(UNIVERSAL_FORGE).collect(Collectors.toList());
 
                     if (jars.size() != 1) throw new IllegalStateException("Could not identify Universal Jar for version " + version);
 
-                    Files.copy(installer.getPath(jars.get(0)), output.getPath("maven/net/minecraftforge/forge/{version}/forge-{version}.jar".replace("{version}", version)));
+                    Files.copy(installer.getPath(jars.get(0)), output.getPath("maven/net/minecraftforge/forge/{version}/forge-{version}.jar".replace("{version}", standardizedVersion)));
                 }
 
                 // Convert `install_profile.json` -> `install_profile.json` & `version.json`
@@ -110,7 +112,7 @@ public class InstallerConverter {
             }
             // (FSs are closed here; important for the output.jar so the contents are written)
             // Copy the resulting jar
-            Path output = config.output().resolve("{version}/forge-{version}-installer.jar".replace("{version}", Conversions.convertVersion(version)));
+            Path output = config.output().resolve("{version}/forge-{version}-installer.jar".replace("{version}", standardizedVersion));
             Files.createDirectories(output.getParent());
 
             if (config.signingConfig() == null) {
@@ -130,7 +132,7 @@ public class InstallerConverter {
                 forRemoval(baseDir, (path) -> Files.copy(path, backup.getPath(path.getFileName().toString())));
             }
 
-            Path backup = config.output().resolve("backups/backup-{version}.zip".replace("{version}", Conversions.convertVersion(version)));
+            Path backup = config.output().resolve("backups/backup-{version}.zip".replace("{version}", standardizedVersion));
             Files.createDirectories(backup.getParent());
 
             if (Files.exists(backup)) Files.delete(backup);
@@ -140,7 +142,7 @@ public class InstallerConverter {
             forRemoval(baseDir, (path) -> LOGGER.info("FAKE DELETE {}", path)); //TODO: Files::delete
         }
 
-        LOGGER.info("Conversion of Installer for version {} is complete.", version);
+        LOGGER.info("Conversion of Installer for version {} is complete.", standardizedVersion);
     }
 
     /**

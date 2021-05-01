@@ -72,7 +72,7 @@ public final class VersionInfo implements IConvertable<ObjectNode, CommonContext
         data.putIfAbsent("releaseTime", date);
         data.putIfAbsent("type", factory.textNode("release"));
         data.putIfAbsent("mainClass", factory.textNode("net.minecraft.launchwrapper.Launch"));
-        data.putIfAbsent("minimumLauncherVersion", factory.numberNode(4));
+        data.putIfAbsent("minimumLauncherVersion", factory.numberNode(4)); //TODO: CHECK
     }
 
     @Override
@@ -96,8 +96,6 @@ public final class VersionInfo implements IConvertable<ObjectNode, CommonContext
         set(node, "logging");
         set(node, "minecraftArguments"); //TODO: Convert to `arguments` format
 
-        //TODO: minimumLauncherVersion?
-
         if (context.client() != null || context.server() != null) {
             ObjectNode downloads = factory.objectNode();
             if (context.client() != null) addDownload(factory, downloads, context.client(), "client");
@@ -111,6 +109,7 @@ public final class VersionInfo implements IConvertable<ObjectNode, CommonContext
         // Convert Libraries
         List<ObjectNode> libs = new ArrayList<>();
         for (LibraryInfo library : libraries) {
+            library.standardise(context.minecraft());
             libs.add(library.convert(context, factory));
         }
 
