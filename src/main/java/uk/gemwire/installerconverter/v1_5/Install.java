@@ -146,8 +146,8 @@ public final class Install implements IConvertable<ObjectNode, CommonContext> {
         forge.setUrl(Maven.FORGE);
         forge.standardise(minecraft);
 
-        /* Skip MirrorList if it's forges - TODO: Check this is correct */
-        if (Objects.equals(mirrorList, "http://files.minecraftforge.net/mirror-brand.list")) mirrorList = null;
+        /* Migrate MirrorList if it's forges */
+        if (Objects.equals(mirrorList, "http://files.minecraftforge.net/mirror-brand.list")) mirrorList = "https://files.minecraftforge.net/mirrors-2.0.json";
 
         node.set("_comment_", Conversions.createCommentNode(factory));
         node.put("spec", 0);

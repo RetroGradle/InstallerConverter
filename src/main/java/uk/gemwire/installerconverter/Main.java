@@ -71,7 +71,7 @@ public class Main {
         Predicate<String> predicate = (value) -> {
             String versionString = Conversions.convertVersion(value).split("\\.", 3)[1];
             int version = Integer.parseInt(versionString);
-            return version == 7; // 7 <= version && version <= 12; //
+            return 7 <= version && version <= 12; //
         };
 
         try {
