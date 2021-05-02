@@ -7,14 +7,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.Maven;
 
-public class Installers {
-    private static final Logger LOGGER = LoggerFactory.getLogger("Installers");
+@Slf4j(topic = "Installers")
+public abstract class Installers {
 
     public static Path provide(Config config) {
         Artifact installer = Artifact.of("net.minecraftforge:installer:{version}:shrunk".replace("{version}", config.installerVersion()));
@@ -25,12 +24,12 @@ public class Installers {
     }
 
     private static void download(Config config, Artifact artifact, Path destination) throws IOException {
-        LOGGER.info("Downloading installer {} from {} to {}...", artifact, config.baseMaven() + artifact.asPath(), destination);
+        log.info("Downloading installer {} from {} to {}...", artifact, config.baseMaven() + artifact.asPath(), destination);
         //TODO: MIGRATE TO AN OFFICIAL FORGE BUILD
         try (InputStream in = new URL(Maven.ATERANIMAVIS + artifact.asPath()).openStream()) {
             Files.copy(in, destination, StandardCopyOption.REPLACE_EXISTING);
         }
-        LOGGER.info("Downloaded installer!");
+        log.info("Downloaded installer!");
     }
 
 }

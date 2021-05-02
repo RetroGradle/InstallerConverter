@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.JacksonUsed;
-import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 import uk.gemwire.installerconverter.v1_5.conversion.CommonContext;
 import uk.gemwire.installerconverter.v1_5.conversion.Converted;
 import uk.gemwire.installerconverter.v1_5.conversion.IConvertable;
@@ -53,9 +52,7 @@ public final class InstallProfile implements IConvertable<Converted, Config> {
     @Override
     public Converted convert(Config config, JsonNodeFactory factory) throws IOException {
         String minecraft = install.getMinecraft();
-        CachedArtifactInfo client = null;
-        CachedArtifactInfo server = null;
 
-        return Converted.of(install.convert(CommonContext.of(config, minecraft, client, server), factory), versionInfo.convert(CommonContext.of(config, minecraft, client, server), factory));
+        return Converted.of(install.convert(CommonContext.of(config, minecraft), factory), versionInfo.convert(CommonContext.of(config, minecraft), factory));
     }
 }

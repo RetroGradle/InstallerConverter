@@ -2,40 +2,23 @@ package uk.gemwire.installerconverter.v1_5.processor;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Objects;
+import javax.annotation.Nonnull;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.google.common.base.MoreObjects;
+import lombok.Value;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.ArtifactKey;
 import uk.gemwire.installerconverter.util.maven.Maven;
 import uk.gemwire.installerconverter.v1_5.LibraryInfo;
 
+@Value
 public class Processor {
 
-    private final ArtifactKey processor;
-    private final ArtifactKey[] classpathInfos;
-    private final Artifact[] classpathArtifacts;
-
-    public Processor(ArtifactKey processor, ArtifactKey[] classpathInfos, Artifact[] classpathArtifacts) {
-        this.processor = processor;
-        this.classpathInfos = classpathInfos;
-        this.classpathArtifacts = classpathArtifacts;
-    }
-
-    public ArtifactKey processor() {
-        return processor;
-    }
-
-    public ArtifactKey[] classpathInfos() {
-        return classpathInfos;
-    }
-
-    public Artifact[] classpathArtifacts() {
-        return classpathArtifacts;
-    }
+    @Nonnull ArtifactKey processor;
+    @Nonnull ArtifactKey[] classpathInfos;
+    @Nonnull Artifact[] classpathArtifacts;
 
     public Artifact jar() {
         return processor.artifact();
@@ -75,30 +58,5 @@ public class Processor {
 
     public static Processor of(ArtifactKey key, ArtifactKey... classpath) {
         return new Processor(key, classpath, Arrays.stream(classpath).map(ArtifactKey::artifact).toArray(Artifact[]::new));
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Processor processor1 = (Processor) o;
-        return Objects.equals(processor, processor1.processor) && Arrays.equals(classpathInfos, processor1.classpathInfos) && Arrays.equals(classpathArtifacts, processor1.classpathArtifacts);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = Objects.hash(processor);
-        result = 31 * result + Arrays.hashCode(classpathInfos);
-        result = 31 * result + Arrays.hashCode(classpathArtifacts);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("processor", processor)
-            .add("classpathInfos", classpathInfos)
-            .add("classpathArtifacts", classpathArtifacts)
-            .toString();
     }
 }

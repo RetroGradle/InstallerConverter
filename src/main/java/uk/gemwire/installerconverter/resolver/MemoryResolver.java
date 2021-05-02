@@ -9,20 +9,18 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import javax.annotation.Nullable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import uk.gemwire.installerconverter.util.Hashing;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 
+@Slf4j(topic = "MemoryResolver")
 public class MemoryResolver extends AbstractResolver {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger("MemoryResolver");
 
     private final Path localRoot;
 
     public MemoryResolver(Path localRoot, @Nullable IResolver fallback) {
-        super(fallback, LOGGER);
+        super(fallback, log);
 
         this.localRoot = localRoot;
     }
@@ -36,13 +34,13 @@ public class MemoryResolver extends AbstractResolver {
         // If we don't have a local copy return
         if (!Files.exists(local)) return null;
 
-        LOGGER.trace("Checking for local copy of artifact {} (of host {})", artifact, host);
+        log.trace("Checking for local copy of artifact {} (of host {})", artifact, host);
 
         try (InputStream stream = Files.newInputStream(local, StandardOpenOption.READ)) {
             // Otherwise calculate from Local
             CachedArtifactInfo fromLocal = Hashing.calculateSHA1andSize(stream, "");
 
-            LOGGER.trace("Using local copy of artifact {} from host {}", artifact, host);
+            log.trace("Using local copy of artifact {} from host {}", artifact, host);
             return fromLocal;
         }
     }

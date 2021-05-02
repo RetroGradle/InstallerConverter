@@ -23,6 +23,7 @@ import uk.gemwire.installerconverter.util.Installers;
 import uk.gemwire.installerconverter.util.Jackson;
 import uk.gemwire.installerconverter.util.common.IOConsumer;
 import uk.gemwire.installerconverter.util.signing.JarSignerInterop;
+import uk.gemwire.installerconverter.util.signing.SigningConfig;
 import uk.gemwire.installerconverter.v1_5.InstallProfile;
 import uk.gemwire.installerconverter.v1_5.conversion.Conversions;
 import uk.gemwire.installerconverter.v1_5.conversion.Converted;
@@ -92,6 +93,10 @@ public class InstallerConverter {
                     output.getPath("version.json")
                 );
 
+                // TODO: FOR TESTING REMOVE
+                //Files.copy(output.getPath("install_profile.json"), inMemFS.getPath("install_profile.json"));
+                //Files.copy(output.getPath("version.json"), inMemFS.getPath("version.json"));
+
                 // Optionally Copy Big Logo
                 if (config.overrideBigLogo()) {
                     LOGGER.info(" - Copying big_logo.png");
@@ -113,14 +118,19 @@ public class InstallerConverter {
             // (FSs are closed here; important for the output.jar so the contents are written)
             // Copy the resulting jar
             Path output = config.output().resolve("{version}/forge-{version}-installer.jar".replace("{version}", version));
-            Files.createDirectories(output.getParent());
+            if (output.getParent() != null) Files.createDirectories(output.getParent());
 
-            if (config.signingConfig() == null) {
+            // TODO: FOR TESTING REMOVE
+            //Files.copy(inMemFS.getPath("install_profile.json"), config.output().resolve("{version}/install_profile.json".replace("{version}", version)), StandardCopyOption.REPLACE_EXISTING);
+            //Files.copy(inMemFS.getPath("version.json"), config.output().resolve("{version}/version.json".replace("{version}", version)), StandardCopyOption.REPLACE_EXISTING);
+
+            SigningConfig signingConfig = config.signingConfig();
+            if (signingConfig == null) {
                 LOGGER.info(" - Copying output jar to disk");
                 Files.copy(memoryOutputJar, output, StandardCopyOption.REPLACE_EXISTING);
             } else {
                 LOGGER.info(" - Copying and Signing output jar to disk");
-                JarSignerInterop.sign(config.signingConfig(), memoryOutputJar, output);
+                JarSignerInterop.sign(signingConfig, memoryOutputJar, output);
             }
 
             // TODO: Redesign this? Where do we want the backups and how, what do we want to delete, etc
@@ -133,7 +143,7 @@ public class InstallerConverter {
             }
 
             Path backup = config.output().resolve("backups/backup-{version}.zip".replace("{version}", version));
-            Files.createDirectories(backup.getParent());
+            if (backup.getParent() != null) Files.createDirectories(backup.getParent());
 
             if (Files.exists(backup)) Files.delete(backup);
             Files.copy(inMemBackup, backup);

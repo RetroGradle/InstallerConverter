@@ -135,7 +135,7 @@ public abstract class VersionManifest {
     }
 
     private static void download(String version, Path destination) throws IOException {
-        Files.createDirectories(destination.getParent());
+        if (destination.getParent() != null) Files.createDirectories(destination.getParent());
 
         LOGGER.info("Downloading launcher-meta {} to {}...", version, destination);
         try (InputStream in = Maven.download(new URL(getVersionUrl(version)))) {

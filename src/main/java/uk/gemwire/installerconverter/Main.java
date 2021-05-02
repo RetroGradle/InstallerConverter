@@ -40,9 +40,9 @@ public class Main {
             .withCachingResolver()                      // Setups Resolvers so it uses a cache
             .withOutput(Path.of("outputs"))             // Output Location
             .transformSigningConfig(it -> it            // Configure Signing Parameters
-                .withKeyStore(Path.of("keystore.jks"))  // Path to keystore
-                .withStorePass("keystorepass")          // Keystore password
-                //.withKeyPass("keypass")               // Key password (Can be skipped or pass in "")
+                .withKeystore(Path.of("keystore.jks"))  // Path to keystore
+                .withStorepass("keystorepass")          // Keystore password
+                //.withKeypass("keypass")               // Key password (Can be skipped or pass in "")
                 .withAlias("forge")                     // Default Value can be skipped
             );
             //.withSigningConfig(null);                 // Skip Signing by removing the SigningConfig

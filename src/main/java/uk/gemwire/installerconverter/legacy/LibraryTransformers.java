@@ -96,7 +96,7 @@ public class LibraryTransformers {
 
         if (!predicate.test(gav)) return info;
 
-        return info.with(transform.apply(gav));
+        return info.withArtifact(transform.apply(gav));
     }
 
     private static Predicate<ArtifactKey> filterMaven(String host) {

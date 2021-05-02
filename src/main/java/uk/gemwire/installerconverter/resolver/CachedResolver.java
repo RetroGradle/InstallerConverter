@@ -8,14 +8,13 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import uk.gemwire.installerconverter.util.maven.Artifact;
 import uk.gemwire.installerconverter.util.maven.ArtifactKey;
 import uk.gemwire.installerconverter.util.maven.CachedArtifactInfo;
 
+@Slf4j(topic = "CachedResolver")
 public class CachedResolver implements IResolver {
-    private static final Logger LOGGER = LoggerFactory.getLogger("CachedResolver");
 
     private final Map<ArtifactKey, CachedArtifactInfo> cache = new HashMap<>();
     private final IResolver fallback;
@@ -27,9 +26,9 @@ public class CachedResolver implements IResolver {
     @Override
     @Nullable
     public CachedArtifactInfo resolve(String host, Artifact artifact) {
-        LOGGER.trace("Retrieving artifact {} (of host {}) from cache", artifact.asStringWithClassifier(), host);
+        log.trace("Retrieving artifact {} (of host {}) from cache", artifact.asStringWithClassifier(), host);
         return cache.computeIfAbsent(ArtifactKey.of(host, artifact), pair -> {
-            LOGGER.trace("Artifact {} not found in cache, resolving from host {}", pair.artifact().asStringWithClassifier(), pair.host());
+            log.trace("Artifact {} not found in cache, resolving from host {}", pair.artifact().asStringWithClassifier(), pair.host());
             return fallback.resolve(pair.host(), pair.artifact());
         });
     }
@@ -75,11 +74,11 @@ public class CachedResolver implements IResolver {
                     String[] parts = entry.split(",");
 
                     if (parts.length != 5) {
-                        LOGGER.error(String.format("Invalid cache line (Length '%s' expected 5) '%s'", parts.length, entry));
+                        log.error(String.format("Invalid cache line (Length '%s' expected 5) '%s'", parts.length, entry));
                         return;
                     }
 
-                    cache.put(ArtifactKey.of(parts[0], Artifact.of(parts[1])), new CachedArtifactInfo(parts[2], Long.parseLong(parts[3]), parts[4].trim()));
+                    cache.put(ArtifactKey.of(parts[0], Artifact.of(parts[1])), CachedArtifactInfo.of(parts[2], Long.parseLong(parts[3]), parts[4].trim()));
                 });
         }
     }

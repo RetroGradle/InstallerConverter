@@ -72,7 +72,7 @@ public final class VersionInfo implements IConvertable<ObjectNode, CommonContext
         data.putIfAbsent("releaseTime", date);
         data.putIfAbsent("type", factory.textNode("release"));
         data.putIfAbsent("mainClass", factory.textNode("net.minecraft.launchwrapper.Launch"));
-        data.putIfAbsent("minimumLauncherVersion", factory.numberNode(4)); //TODO: CHECK
+        data.putIfAbsent("minimumLauncherVersion", factory.numberNode(14)); //TODO: CHECK
     }
 
     @Override
@@ -98,8 +98,10 @@ public final class VersionInfo implements IConvertable<ObjectNode, CommonContext
 
         if (context.client() != null || context.server() != null) {
             ObjectNode downloads = factory.objectNode();
-            if (context.client() != null) addDownload(factory, downloads, context.client(), "client");
-            if (context.server() != null) addDownload(factory, downloads, context.server(), "server");
+            CachedArtifactInfo client = context.client();
+            CachedArtifactInfo server = context.server();
+            if (client != null) addDownload(factory, downloads, client, "client");
+            if (server != null) addDownload(factory, downloads, server, "server");
             data.put("downloads", downloads);
         }
 

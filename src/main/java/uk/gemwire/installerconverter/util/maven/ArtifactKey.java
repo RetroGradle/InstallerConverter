@@ -1,36 +1,24 @@
 package uk.gemwire.installerconverter.util.maven;
 
 import java.io.IOException;
-import java.util.Objects;
+import javax.annotation.Nonnull;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.MoreObjects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.Value;
+import lombok.With;
+import lombok.extern.slf4j.Slf4j;
 import uk.gemwire.installerconverter.Config;
 import uk.gemwire.installerconverter.v1_5.LibraryInfo;
 import uk.gemwire.installerconverter.v1_5.conversion.IConvertable;
 
+@With
+@Value
+@Slf4j(topic = "ArtifactKey")
 public class ArtifactKey implements IConvertable<ObjectNode, Config> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("ArtifactKey");
-
-    private final String host;
-    private final Artifact artifact;
-
-    public ArtifactKey(String host, Artifact artifact) {
-        this.host = host;
-        this.artifact = artifact;
-    }
-
-    public String host() {
-        return host;
-    }
-
-    public Artifact artifact() {
-        return artifact;
-    }
+    @Nonnull String host;
+    @Nonnull Artifact artifact;
 
     //==================================================================================================================
 
@@ -53,14 +41,6 @@ public class ArtifactKey implements IConvertable<ObjectNode, Config> {
         return of(info.getUrl(), info.getGav());
     }
 
-    public ArtifactKey with(String host) {
-        return of(host, artifact);
-    }
-
-    public ArtifactKey with(Artifact artifact) {
-        return of(host, artifact);
-    }
-
     //==================================================================================================================
 
     @Override
@@ -73,7 +53,7 @@ public class ArtifactKey implements IConvertable<ObjectNode, Config> {
         String path = artifact.asPath();
         String finalURL = host + path;
 
-        LOGGER.debug("Resolving: " + finalURL);
+        log.debug("Resolving: " + finalURL);
 
         ObjectNode node = factory.objectNode();
         node.put("path", path);
@@ -88,28 +68,5 @@ public class ArtifactKey implements IConvertable<ObjectNode, Config> {
         node.put("size", data.expectedSize());
 
         return node;
-    }
-
-    //==================================================================================================================
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ArtifactKey that = (ArtifactKey) o;
-        return Objects.equals(host, that.host) && Objects.equals(artifact, that.artifact);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(host, artifact);
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("host", host)
-            .add("artifact", artifact)
-            .toString();
     }
 }
